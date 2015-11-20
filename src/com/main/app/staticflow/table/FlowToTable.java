@@ -1,6 +1,6 @@
 package com.main.app.staticflow.table;
 
-import model.overview.Flow;
+import com.basic.elements.Flow;
 
 public class FlowToTable {
 

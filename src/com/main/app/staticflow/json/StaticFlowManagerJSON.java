@@ -9,16 +9,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import model.overview.Flow;
-import controller.floodlightprovider.FloodlightProvider;
-import controller.util.Deserializer;
-import controller.util.JSONArray;
-import controller.util.JSONException;
-import controller.util.JSONObject;
+import com.basic.elements.Flow;
+import com.main.provider.DataProvider;
+import com.tools.util.Deserializer;
+import com.tools.util.JSONArray;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class StaticFlowManagerJSON {
 
-	static String IP = FloodlightProvider.getIP();
+	static String IP = DataProvider.getIP();
 	static JSONObject jsonobj, obj;
 	static JSONArray json;
 	static Future<Object> future;

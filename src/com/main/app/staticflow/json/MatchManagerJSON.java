@@ -6,12 +6,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import model.overview.Match;
-import controller.floodlightprovider.FloodlightProvider;
-import controller.util.Deserializer;
-import controller.util.JSONArray;
-import controller.util.JSONException;
-import controller.util.JSONObject;
+import com.basic.elements.Match;
+import com.main.provider.DataProvider;
+import com.tools.util.Deserializer;
+import com.tools.util.JSONArray;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class MatchManagerJSON {
 
@@ -21,8 +21,8 @@ public class MatchManagerJSON {
 			networkSourceMaskLength, networkTypeOfService,
 			transportDestination, transportSource, wildcards;
 
-	private static String IP = FloodlightProvider.getIP();
-	private static String PORT = FloodlightProvider.getPort();
+	private static String IP = DataProvider.getIP();
+	private static String PORT = DataProvider.getPORT();
 	private static JSONObject obj, jsonobj;
 	private static JSONArray json;
 	private static Future<Object> future;

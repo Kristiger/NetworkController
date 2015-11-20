@@ -1,6 +1,7 @@
 package com.main.app.qos;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,10 +15,14 @@ public class QosPolicy {
 	private long maxRate;
 	private long minRate;
 
-	private Map<String, QosQueue> queues;
+	// <id, uuid>; max is 7
+	private Map<Integer, String> queues;
 
 	public QosPolicy() {
-		queues = new HashMap<String, QosQueue>();
+		queues = Collections.synchronizedMap(new HashMap<Integer, String>());
+		for (int i = 0; i < 7; i++) {
+			queues.put(i, null);
+		}
 	}
 
 	public QosPolicy(String uuid) {
@@ -27,7 +32,6 @@ public class QosPolicy {
 
 	public QosPolicy(long maxRate, long minRate) {
 		this();
-
 		this.maxRate = maxRate;
 		this.minRate = minRate;
 	}
@@ -72,44 +76,22 @@ public class QosPolicy {
 		this.minRate = minRate;
 	}
 
-	public void addQueue(QosQueue queue) {
-		queues.add(queue);
-	}
-
-	public QosQueue getQueue(String queueid) {
-		Iterator<QosQueue> it = queues.iterator();
-		QosQueue queue = null;
-		while (it.hasNext()) {
-			queue = it.next();
-			if (queue.getQueueID() == Integer.valueOf(queueid))
-				return queue;
+	/**
+	 * @param queueUuid to add
+	 * @return queue id, 0-6, -1 if all 7 queues are full
+	 */
+	public int addQueue(String queueUuid) {
+		for (Integer id : queues.keySet()) {
+			if (queues.get(id) == null) {
+				queues.remove(id);
+				queues.put(id, queueUuid);
+				return id;
+			}
 		}
-		return null;
+		return -1;
 	}
 
-	public List<QosQueue> getQueues() {
+	public Map<Integer, String> getQueues() {
 		return queues;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-
-		QosPolicy other = (QosPolicy) obj;
-		if (this.toString().equals(other.toString())) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		return "QosPolicy [uuid=" + uuid + ", maxRate=" + maxRate
-				+ ", minRate=" + minRate + ", queues=" + queues.toString() + "]";
 	}
 }

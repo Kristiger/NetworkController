@@ -2,10 +2,10 @@ package com.main.app.staticflow.pusher;
 
 import java.util.List;
 
-import model.overview.Action;
-import model.overview.Flow;
-
 import org.eclipse.swt.widgets.TableItem;
+
+import com.basic.elements.Action;
+import com.basic.elements.Flow;
 
 public class ActionManagerPusher {
 

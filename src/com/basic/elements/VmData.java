@@ -13,9 +13,9 @@ public class VmData {
 	private String MacAddr;
 	private String SwitchPort;
 	private String SwitchDpid;
-	private Date LastSeen;
 	
-	private QosPolicy qos = new QosPolicy();
+	private String qosUuid;
+	private Date LastSeen;
 	
 	public String getVmUuid() {
 		return vmUuid;
@@ -72,17 +72,19 @@ public class VmData {
 	public void setLastSeen(Date lastSeen) {
 		LastSeen = lastSeen;
 	}
-	public QosPolicy getQos() {
-		return qos;
+	public String getQosUuid() {
+		return qosUuid;
 	}
-	public void setQos(QosPolicy qos) {
-		this.qos = qos;
+	public void setQosUuid(String qosUuid) {
+		this.qosUuid = qosUuid;
 	}
 	@Override
 	public String toString() {
-		return "VMData [vmUuid=" + vmUuid + ", vifUuid=" + vifUuid
-				+ ", vmNameLabel=" + NameLabel + ", vmVifNumber="
-				+ VifNumber + ", vmIpAddr=" + IpAddr + ", vmMacAddr="
-				+ MacAddr + ", vmSwitchPort=" + SwitchPort + "]";
+		return "VmData [vmUuid=" + vmUuid + ", vifUuid=" + vifUuid
+				+ ", NameLabel=" + NameLabel + ", VifNumber=" + VifNumber
+				+ ", IpAddr=" + IpAddr + ", MacAddr=" + MacAddr
+				+ ", SwitchPort=" + SwitchPort + ", SwitchDpid=" + SwitchDpid
+				+ ", qosUuid=" + qosUuid + ", LastSeen=" + LastSeen + "]";
 	}
+	
 }

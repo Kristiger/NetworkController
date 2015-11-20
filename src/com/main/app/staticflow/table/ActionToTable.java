@@ -4,12 +4,11 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.TableItem;
 
-import controller.util.ErrorCheck;
-import model.overview.Action;
-import model.overview.Port;
-import model.overview.Switch;
-import view.StaticFlowManager;
-import view.util.DisplayMessage;
+import com.basic.elements.Action;
+import com.basic.elements.Port;
+import com.basic.elements.Switch;
+import com.main.view.util.DisplayMessage;
+import com.tools.util.ErrorCheck;
 
 public class ActionToTable {
 

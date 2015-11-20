@@ -3,9 +3,8 @@ package com.tools.table;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.overview.Device;
-import controller.overview.json.DevicesJSON;
-import controller.util.JSONException;
+import com.basic.elements.Device;
+import com.tools.util.JSONException;
 
 public class DeviceToTable {
 

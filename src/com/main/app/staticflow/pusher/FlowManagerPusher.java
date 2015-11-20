@@ -10,18 +10,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
-import controller.floodlightprovider.FloodlightProvider;
-import controller.util.ErrorCheck;
-import controller.util.JSONException;
-import controller.util.JSONObject;
-import model.overview.Flow;
-import view.StaticFlowManager;
-import view.util.DisplayMessage;
+import com.basic.elements.Flow;
+import com.main.provider.DataProvider;
+import com.main.view.util.DisplayMessage;
+import com.tools.util.ErrorCheck;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class FlowManagerPusher {
 
-	static String IP = FloodlightProvider.getIP();
-	static String PORT = FloodlightProvider.getPort();
+	static String IP = DataProvider.getIP();
+	static String PORT = DataProvider.getPort();
 
 	public static String push(Flow flow) throws IOException, JSONException {
 
@@ -57,7 +56,7 @@ public class FlowManagerPusher {
 				|| json.getString("status").equals(warning)) {
 			// Get actual flows, we pass null as first parameter
 			// to denote that we are not supplying a JSON object
-			List<Flow> actualFlows = FloodlightProvider.getRealFlows(
+			List<Flow> actualFlows = DataProvider.getRealFlows(
 					flow.getSwitch(), true);
 			// Compare the flow you just pushed with those actually on the
 			// switch

@@ -1,9 +1,6 @@
 package com.main.app.staticflow.json;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -11,18 +8,17 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import model.overview.Action;
-import controller.floodlightprovider.FloodlightProvider;
-import controller.util.Deserializer;
-import controller.util.HexString;
-import controller.util.JSONArray;
-import controller.util.JSONException;
-import controller.util.JSONObject;
+import com.basic.elements.Action;
+import com.main.provider.DataProvider;
+import com.tools.util.Deserializer;
+import com.tools.util.JSONArray;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class ActionManagerJSON {
 
-	private static String IP = FloodlightProvider.getIP();
-	private static String PORT = FloodlightProvider.getPort();
+	private static String IP = DataProvider.getIP();
+	private static String PORT = DataProvider.getPORT();
 	private static JSONObject obj, jsonobj;
 	private static JSONArray json;
 	private static Future<Object> future;

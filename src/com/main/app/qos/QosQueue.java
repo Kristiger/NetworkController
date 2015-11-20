@@ -3,18 +3,16 @@ package com.main.app.qos;
 public class QosQueue {
 	
 	private String uuid;
-	private int queueID;
 	private long minRate;
 	private long maxRate;
 	
-	public QosQueue(int queueID, long minRate, long maxRate){
-		this.queueID = queueID;
-		this.minRate = minRate;
-		this.maxRate = maxRate;
-	}
-	
 	public QosQueue(){
 		
+	}
+	
+	public QosQueue(long minRate, long maxRate){
+		this.minRate = minRate;
+		this.maxRate = maxRate;
 	}
 	
 	public String getUuid() {
@@ -22,12 +20,6 @@ public class QosQueue {
 	}
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
-	}
-	public int getQueueID() {
-		return queueID;
-	}
-	public void setQueueID(int queueID) {
-		this.queueID = queueID;
 	}
 	public long getMinRate() {
 		return minRate;
@@ -40,30 +32,5 @@ public class QosQueue {
 	}
 	public void setMaxRate(long maxRate) {
 		this.maxRate = maxRate;
-	}
-	
-	public Object serialize() {
-		// TODO Auto-generated method stub
-		if(!check()){
-			return "error, see log";
-		}
-		
-		StringBuilder seri = new StringBuilder();
-		seri.append(" -- --id=@q" + queueID + " create queue");
-		if (maxRate != 0)
-			seri.append(" other-config:max-rate=" + String.valueOf(maxRate));		
-		if (minRate != 0)
-			seri.append(" other-config:min-rate=" + String.valueOf(minRate));
-				
-		return seri.toString();
-	}
-	
-	public boolean check(){
-		if (maxRate == 0 && minRate == 0){
-			System.out.println("Rate can't be both set 0.");
-			return false;
-		}
-		
-		return true;
 	}
 }

@@ -1,8 +1,8 @@
 package com.main.app.staticflow.pusher;
 
-import model.overview.Match;
-
 import org.eclipse.swt.widgets.TableItem;
+
+import com.basic.elements.Match;
 
 public class MatchManagerPusher {
 
