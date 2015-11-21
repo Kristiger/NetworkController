@@ -7,15 +7,15 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.overview.Action;
-import controller.floodlightprovider.FloodlightProvider;
-import controller.util.JSONArray;
-import controller.util.JSONException;
-import controller.util.JSONObject;
+import com.basic.elements.Action;
+import com.main.provider.DataProvider;
+import com.tools.util.JSONArray;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class ActionJSON {
 
-	static String IP = FloodlightProvider.getIP();
+	static String IP = DataProvider.getIP();
 	static JSONObject obj;
 	static JSONArray json;
 

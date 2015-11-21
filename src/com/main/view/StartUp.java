@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import com.main.provider.DataProvider;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.Label;
+import com.main.view.util.SWTResourceManager;
 
 public class StartUp {
 
@@ -96,6 +95,7 @@ public class StartUp {
 				DataProvider.setIP(IP);
 				DataProvider.setPORT(PORT);
 				new MainFrame();
+				shell.setVisible(false);
 			}
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block

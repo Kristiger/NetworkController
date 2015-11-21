@@ -3,8 +3,8 @@ package com.tools.table;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller.util.FormatLong;
-import model.overview.Flow;
+import com.basic.elements.Flow;
+import com.tools.util.FormatLong;
 
 public class FlowToTable {
 

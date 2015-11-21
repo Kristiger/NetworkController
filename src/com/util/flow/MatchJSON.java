@@ -2,10 +2,10 @@ package com.util.flow;
 
 import java.io.IOException;
 
-import model.overview.Match;
-import controller.util.JSONArray;
-import controller.util.JSONException;
-import controller.util.JSONObject;
+import com.basic.elements.Match;
+import com.tools.util.JSONArray;
+import com.tools.util.JSONException;
+import com.tools.util.JSONObject;
 
 public class MatchJSON {
 

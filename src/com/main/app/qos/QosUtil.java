@@ -1,22 +1,19 @@
 package com.main.app.qos;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.util.db.DBHelper;
 
 public class QosUtil {
-	private static Map<String, QosPolicy> qoses = Collections
-			.synchronizedMap(new HashMap<String, QosPolicy>());
+	private static Map<String, QosPolicy> qoses = new ConcurrentHashMap<String, QosPolicy>();
 	private static DBHelper db;
 
 	enum UPDATE {
 		ADD, REMOVE
 	}
-	
-	public QosUtil(){
+
+	public QosUtil() {
 		updateFromDB();
 	}
 
@@ -61,7 +58,7 @@ public class QosUtil {
 		}
 		return false;
 	}
-	
+
 	private static void updataDB(QosPolicy qos, UPDATE type) {
 		db = new DBHelper();
 		if (type == UPDATE.ADD) {

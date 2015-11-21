@@ -11,7 +11,6 @@ public class Switch {
 			flowCount;
 
 	List<Port> ports = new ArrayList<Port>();
-	List<Flow> flows = new ArrayList<Flow>();
 
 	public Switch(String dpid) {
 		this.dpid = dpid;
@@ -96,14 +95,5 @@ public class Switch {
 
 	public void setPorts(List<Port> ports) {
 		this.ports = ports;
-	}
-
-	public List<Flow> getFlows(){
-		Collections.sort(flows);
-		return flows;
-	}
-
-	public void setFlows(List<Flow> flows) {
-		this.flows = flows;
 	}
 }

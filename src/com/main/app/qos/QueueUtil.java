@@ -1,15 +1,12 @@
 package com.main.app.qos;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.main.app.qos.QosUtil.UPDATE;
 import com.util.db.DBHelper;
 
 public class QueueUtil {
-	private static Map<String, QosQueue> queues = Collections
-			.synchronizedMap(new HashMap<String, QosQueue>());
+	private static Map<String, QosQueue> queues = new ConcurrentHashMap<String, QosQueue>();
 	private static DBHelper db = null;
 
 	enum UPDATE {

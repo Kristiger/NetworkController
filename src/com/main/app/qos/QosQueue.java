@@ -7,7 +7,6 @@ public class QosQueue {
 	private long maxRate;
 	
 	public QosQueue(){
-		
 	}
 	
 	public QosQueue(long minRate, long maxRate){

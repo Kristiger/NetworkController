@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class QosPolicy {
 	private String uuid;
@@ -19,7 +20,7 @@ public class QosPolicy {
 	private Map<Integer, String> queues;
 
 	public QosPolicy() {
-		queues = Collections.synchronizedMap(new HashMap<Integer, String>());
+		queues = new ConcurrentHashMap<Integer, String>();
 		for (int i = 0; i < 7; i++) {
 			queues.put(i, null);
 		}
@@ -77,7 +78,8 @@ public class QosPolicy {
 	}
 
 	/**
-	 * @param queueUuid to add
+	 * @param queueUuid
+	 *            to add
 	 * @return queue id, 0-6, -1 if all 7 queues are full
 	 */
 	public int addQueue(String queueUuid) {
