@@ -19,6 +19,10 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.basic.elements.Switch;
 import com.main.provider.DataProvider;
 import com.main.view.util.SWTResourceManager;
+import com.tools.util.JSONException;
+
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 
 public class MainFrame {
 
@@ -55,7 +59,12 @@ public class MainFrame {
 
 	protected void updateSwitch() {
 		// TODO Auto-generated method stub
-		switches = DataProvider.getSwitches(true);
+		try {
+			switches = DataProvider.getSwitches(true);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -63,6 +72,12 @@ public class MainFrame {
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.CLOSE | SWT.MIN);
+		shell.addShellListener(new ShellAdapter() {
+			@Override
+			public void shellClosed(ShellEvent e) {
+				System.exit(0);
+			}
+		});
 		shell.setSize(1260, 850);
 		shell.setText("SWT Application");
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
@@ -116,7 +131,7 @@ public class MainFrame {
 								item.setText(sw.getDpid());
 							}
 						}
-					} else if (items[0].getText().equals("Device")) {
+					} else if (items[0].getText().equals("Devices")) {
 						if (cp_devicees == null) {
 							cp_devicees = new CompositeDevices(composite_2,
 									SWT.NONE);

@@ -42,5 +42,18 @@ public class FormatLong {
 		}
 		return "" + paramLong;
 	}
-	
+
+	public static String formatBytes(long paramLong) {
+		// TODO Auto-generated method stub
+		if (paramLong >= 1000000000L) {
+			return paramLong / 1000000000L + " GB";
+		}
+		if (paramLong >= 10000000L) {
+			return paramLong / 1000000L + " MB";
+		}
+		if (paramLong >= 1000L) {
+			return paramLong / 1000L + " KB";
+		}
+		return "" + paramLong;
+	}
 }

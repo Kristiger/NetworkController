@@ -1,6 +1,7 @@
 package com.main.provider;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import com.main.app.staticflow.json.StaticFlowManagerJSON;
 import com.tools.table.FlowToTable;
 import com.tools.table.PortToTable;
 import com.tools.util.JSONException;
+import com.util.controller.ControllerJSON;
 import com.util.device.DeviceUtil;
 import com.util.flow.FlowJSON;
 import com.util.sw.SwitchJSON;
@@ -48,50 +50,42 @@ public class DataProvider {
 	}
 
 	public static Map<String, Device> getDevices() {
-		if(devices == null) {
+		if (devices == null) {
 			devices = DeviceUtil.getDevices();
 		}
 		return devices;
 	}
 
 	public static Map<String, QosPolicy> getQoses() {
-		if(qoses == null) {
+		if (qoses == null) {
 			qoses = QosUtil.getQoses();
 		}
 		return qoses;
 	}
 
 	public static Map<String, QosQueue> getQueues() {
-		if(queues == null) {
+		if (queues == null) {
 			queues = QueueUtil.getQueues();
 		}
 		return queues;
 	}
 
-	public static Map<String, Switch> getSwitches(boolean update) {
-		if(switches == null || update) {
-			try {
-				switches = SwitchesJSON.getSwitches();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	public static Map<String, Switch> getSwitches(boolean update)
+			throws JSONException {
+		if (switches == null || update) {
+			switches = SwitchesJSON.getSwitches();
 		}
 		return switches;
 	}
-	
+
 	public static Switch getSwitch(String dpid) {
+		// TODO Auto-generated method stub
 		return switches.get(dpid);
 	}
 
-	public static void getSwitchUpdate(Switch sw) {
+	public static void getSwitchUpdate(Switch sw) throws JSONException {
 		// TODO Auto-generated method stub
-		try {
-			SwitchesJSON.updateSwitch(sw);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		SwitchesJSON.updateSwitch(sw);
 	}
 
 	public static String[][] getPortTableFormat(List<Port> ports) {
@@ -104,11 +98,18 @@ public class DataProvider {
 		return FlowToTable.getFlowTableFormat(flows);
 	}
 
-	public static List<Flow> getFlows(String dpid) throws IOException, JSONException {
+	public static List<Flow> getFlows(String dpid) throws IOException,
+			JSONException {
 		// TODO Auto-generated method stub
 		return FlowJSON.getFlows(dpid);
 	}
+
 	public static Map<String, Flow> getStaticFlows() {
+		// TODO Auto-generated method stub
 		return staticFlows;
+	}
+
+	public static Map<String, String> getControllerInfo() throws JSONException {
+		return ControllerJSON.getControllerInfo();
 	}
 }

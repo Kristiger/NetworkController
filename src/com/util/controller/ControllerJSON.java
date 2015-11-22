@@ -1,10 +1,9 @@
 package com.util.controller;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,14 +27,13 @@ public class ControllerJSON {
 	private static Future<Object> futureHealth, futureModules, futureMemory;
 	private static JSONObject obj;
 
-	public static List<String> getControllerInfo() throws JSONException,
-			IOException {
+	public static Map<String, String> getControllerInfo() throws JSONException {
 
-		List<String> info = new ArrayList<String>();
+		Map<String, String> info = new HashMap<String, String>();
 
 		// Add the ip address of the controller
-		info.add(0, IP);
-		
+		info.put("IP", IP);
+		info.put("PORT", PORT);
 
 		// Start threads that make calls to the restAPI
 		futureHealth = Deserializer.readJsonObjectFromURL("http://" + IP + ":"
@@ -62,9 +60,9 @@ public class ControllerJSON {
 		if (obj == null)
 			return info;
 		if (obj.getBoolean("healthy")) {
-			info.add(1, "Yes");
+			info.put("health", "Yes");
 		} else {
-			info.add(1, "No");
+			info.put("health", "No");
 		}
 
 		// MEMORY
@@ -80,10 +78,16 @@ public class ControllerJSON {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		long free = obj.getLong("free");
-		long total = obj.getLong("total");
-		info.add(2, FormatLong.formatBytes(free, true, false) + " free of "
-				+ FormatLong.formatBytes(total, true, false));
+		if (obj == null) {
+			return info;
+		} else if (obj.has("free")) {
+			long free = obj.getLong("free");
+			if (obj.has("total")) {
+				long total = obj.getLong("total");
+				info.put("memory", FormatLong.formatBytes(free) + " / "
+						+ FormatLong.formatBytes(total));
+			}
+		}
 
 		// MODULES
 		try {
@@ -98,6 +102,9 @@ public class ControllerJSON {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		if (obj == null) {
+			return info;
+		}
 		Iterator<?> myIter = obj.keys();
 		String modules = "";
 		while (myIter.hasNext()) {
@@ -110,7 +117,7 @@ public class ControllerJSON {
 				// Fail silently
 			}
 		}
-		info.add(modules);
+		info.put("modules", modules);
 
 		return info;
 	}

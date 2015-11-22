@@ -277,10 +277,12 @@ public class SwitchesJSON {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-
+		
+		if(json == null) {
+			return switchDpids;
+		}
 		for (int i = 0; i < json.length(); i++) {
 			obj = json.getJSONObject(i);
-			// String dpid = obj.getString("dpid");
 			String dpid = obj.getString("switchDPID");
 			switchDpids.add(dpid);
 		}
