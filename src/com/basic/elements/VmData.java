@@ -2,8 +2,6 @@ package com.basic.elements;
 
 import java.util.Date;
 
-import com.main.app.qos.QosPolicy;
-
 public class VmData {
 	
 	private String vmUuid, vifUuid;

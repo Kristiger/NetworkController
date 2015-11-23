@@ -34,6 +34,7 @@ public class CompositeDevices extends Composite {
 	private Label lblAttachedswitch_1;
 	private Label lblSwitchport_1;
 	private Label lblQosInfo_1;
+	private Composite parent = null;
 
 	/**
 	 * Create the composite.
@@ -43,7 +44,7 @@ public class CompositeDevices extends Composite {
 	 */
 	public CompositeDevices(Composite parent, int style) {
 		super(parent, style);
-
+		this.parent = parent;
 		createContents();
 		updateDevices();
 	}
@@ -122,7 +123,7 @@ public class CompositeDevices extends Composite {
 		else
 			lblMac_1.setText("None");
 		
-		if (currentDevice.getQosUuid() != null)
+		if (currentDevice.getVmUuid() != null)
 			lblUuid_1.setText(currentDevice.getVmUuid());
 		else
 			lblUuid_1.setText("None");
@@ -223,25 +224,25 @@ public class CompositeDevices extends Composite {
 
 		Label lblMac = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblMac = new FormData();
-		fd_lblMac.right = new FormAttachment(0, 401);
+		fd_lblMac.right = new FormAttachment(50);
 		fd_lblMac.top = new FormAttachment(0, 14);
-		fd_lblMac.left = new FormAttachment(0, 340);
+		fd_lblMac.left = new FormAttachment(40);
 		lblMac.setLayoutData(fd_lblMac);
 		lblMac.setAlignment(SWT.RIGHT);
 		lblMac.setText("MAC : ");
 
 		Label lblVifPort = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblVifPort = new FormData();
-		fd_lblVifPort.right = new FormAttachment(0, 663);
+		fd_lblVifPort.right = new FormAttachment(80, 10);
 		fd_lblVifPort.top = new FormAttachment(0, 14);
-		fd_lblVifPort.left = new FormAttachment(0, 602);
+		fd_lblVifPort.left = new FormAttachment(70, 10);
 		lblVifPort.setLayoutData(fd_lblVifPort);
 		lblVifPort.setAlignment(SWT.RIGHT);
 		lblVifPort.setText("VifPort : ");
 
 		Label lblAttachedswitch = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblAttachedswitch = new FormData();
-		fd_lblAttachedswitch.right = new FormAttachment(0, 401);
+		fd_lblAttachedswitch.right = new FormAttachment(50);
 		fd_lblAttachedswitch.top = new FormAttachment(0, 37);
 		fd_lblAttachedswitch.left = new FormAttachment(0, 299);
 		lblAttachedswitch.setLayoutData(fd_lblAttachedswitch);
@@ -259,9 +260,9 @@ public class CompositeDevices extends Composite {
 
 		Label lblSwitchport = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblSwitchport = new FormData();
-		fd_lblSwitchport.right = new FormAttachment(0, 663);
+		fd_lblSwitchport.right = new FormAttachment(80, 10);
 		fd_lblSwitchport.top = new FormAttachment(0, 37);
-		fd_lblSwitchport.left = new FormAttachment(0, 577);
+		fd_lblSwitchport.left = new FormAttachment(70);
 		lblSwitchport.setLayoutData(fd_lblSwitchport);
 		lblSwitchport.setAlignment(SWT.RIGHT);
 		lblSwitchport.setText("SwitchPort : ");
@@ -287,6 +288,8 @@ public class CompositeDevices extends Composite {
 		btnAddQos.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				MainFrame.getMainStackLayout().topControl = MainFrame.getCp_qos();
+				parent.layout();
 			}
 		});
 		FormData fd_btnAddQos = new FormData();
@@ -329,6 +332,8 @@ public class CompositeDevices extends Composite {
 		btnAddstaticflow.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				MainFrame.getMainStackLayout().topControl = MainFrame.getCp_staticflow();
+				parent.layout();
 			}
 		});
 		FormData fd_btnAddstaticflow = new FormData();
@@ -355,7 +360,7 @@ public class CompositeDevices extends Composite {
 
 		lblIp_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblIp_1 = new FormData();
-		fd_lblIp_1.right = new FormAttachment(lblMac);
+		fd_lblIp_1.right = new FormAttachment(40, -10);
 		fd_lblIp_1.top = new FormAttachment(0, 14);
 		fd_lblIp_1.bottom = new FormAttachment(lblIp, 0, SWT.BOTTOM);
 		fd_lblIp_1.left = new FormAttachment(lblIp, 6);
@@ -364,7 +369,7 @@ public class CompositeDevices extends Composite {
 
 		lblMac_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblMac_1 = new FormData();
-		fd_lblMac_1.right = new FormAttachment(lblVifPort);
+		fd_lblMac_1.right = new FormAttachment(70);
 		fd_lblMac_1.top = new FormAttachment(0, 14);
 		fd_lblMac_1.bottom = new FormAttachment(lblIp, 0, SWT.BOTTOM);
 		fd_lblMac_1.left = new FormAttachment(lblMac, 6);
@@ -382,7 +387,7 @@ public class CompositeDevices extends Composite {
 
 		lblUuid_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblUuid_1 = new FormData();
-		fd_lblUuid_1.right = new FormAttachment(lblAttachedswitch);
+		fd_lblUuid_1.right = new FormAttachment(40, -10);
 		fd_lblUuid_1.bottom = new FormAttachment(lblUuid, 0, SWT.BOTTOM);
 		fd_lblUuid_1.left = new FormAttachment(lblUuid, 6);
 		lblUuid_1.setLayoutData(fd_lblUuid_1);
@@ -390,7 +395,7 @@ public class CompositeDevices extends Composite {
 
 		lblAttachedswitch_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblAttachedswitch_1 = new FormData();
-		fd_lblAttachedswitch_1.right = new FormAttachment(lblSwitchport);
+		fd_lblAttachedswitch_1.right = new FormAttachment(70);
 		fd_lblAttachedswitch_1.bottom = new FormAttachment(lblAttachedswitch,
 				0, SWT.BOTTOM);
 		fd_lblAttachedswitch_1.left = new FormAttachment(lblAttachedswitch, 6);

@@ -34,12 +34,14 @@ public class MainFrame {
 	private CompositeController cp_controller = null;
 	private CompositeSwitch cp_switches = null;
 	private CompositeDevices cp_devicees = null;
-	private CompositeQos cp_qos = null;
+	private static CompositeQos cp_qos = null;
 	private CompositeFirewall cp_firewall = null;
-	private CompositeStaticFlow cp_staticflow = null;
+	private static CompositeStaticFlow cp_staticflow = null;
 
 	private TreeItem trtmSwitches;
 	private Map<String, Switch> switches = null;
+	private static Composite composite_2;
+	private static StackLayout stackLayout;
 
 	public MainFrame() {
 		open();
@@ -74,7 +76,7 @@ public class MainFrame {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		shell = new Shell(SWT.CLOSE | SWT.MIN);
+		shell = new Shell(SWT.CLOSE | SWT.MIN | SWT.MAX);
 
 		shell.setSize(WINWIDTH, WINHEIGHT);
 		shell.setLocation(new Point(
@@ -88,9 +90,15 @@ public class MainFrame {
 			}
 		});
 		shell.setText("SWT Application");
-		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
+		shell.setLayout(new FormLayout());
 
 		Composite composite = new Composite(shell, SWT.NONE);
+		FormData fd_composite = new FormData();
+		fd_composite.bottom = new FormAttachment(100);
+		fd_composite.right = new FormAttachment(100);
+		fd_composite.top = new FormAttachment(0);
+		fd_composite.left = new FormAttachment(0);
+		composite.setLayoutData(fd_composite);
 		composite.setLayout(new FormLayout());
 
 		Composite composite_1 = new Composite(composite, SWT.NONE);
@@ -102,14 +110,14 @@ public class MainFrame {
 		composite_1.setLayoutData(fd_composite_1);
 		composite_1.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		final Composite composite_2 = new Composite(composite, SWT.BORDER);
-		final StackLayout stackLayout = new StackLayout();
+		composite_2 = new Composite(composite, SWT.BORDER);
+		stackLayout = new StackLayout();
 		composite_2.setLayout(stackLayout);
 		FormData fd_composite_2 = new FormData();
 		fd_composite_2.top = new FormAttachment(0, 10);
 		fd_composite_2.bottom = new FormAttachment(100, -10);
 		fd_composite_2.left = new FormAttachment(0, 236);
-		fd_composite_2.right = new FormAttachment(0, 1244);
+		fd_composite_2.right = new FormAttachment(100, -10);
 		composite_2.setLayoutData(fd_composite_2);
 
 		final Tree tree = new Tree(composite_1, SWT.BORDER | SWT.NO_FOCUS);
@@ -218,5 +226,23 @@ public class MainFrame {
 	public static Shell getShell() {
 		// TODO Auto-generated method stub
 		return shell;
+	}
+
+	public static StackLayout getMainStackLayout() {
+		return stackLayout;
+	}
+
+	public static CompositeQos getCp_qos() {
+		if (cp_qos == null) {
+			cp_qos = new CompositeQos(composite_2, SWT.NONE);
+		}
+		return cp_qos;
+	}
+
+	public static CompositeStaticFlow getCp_staticflow() {
+		if (cp_staticflow == null) {
+			cp_staticflow = new CompositeStaticFlow(composite_2, SWT.NONE);
+		}
+		return cp_staticflow;
 	}
 }
