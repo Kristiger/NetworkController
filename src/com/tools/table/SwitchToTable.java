@@ -3,7 +3,7 @@ package com.tools.table;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.overview.Switch;
+import com.basic.elements.Switch;
 
 public class SwitchToTable {
 

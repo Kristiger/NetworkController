@@ -8,17 +8,32 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 
 import com.basic.elements.Device;
+import com.main.provider.DataProvider;
+import com.tools.util.JSONException;
+
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class CompositeDevices extends Composite {
 	private Table table;
 
 	private Map<String, Device> devices = null;
+	private Device currentDevice = null;
+	private Label lblIp_1;
+	private Label lblMac_1;
+	private Label lblVifPort_1;
+	private Label lblUuid_1;
+	private Label lblAttachedswitch_1;
+	private Label lblSwitchport_1;
+	private Label lblQosInfo_1;
 
 	/**
 	 * Create the composite.
@@ -39,22 +54,117 @@ public class CompositeDevices extends Composite {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				while (true) {
+					try {
+						devices = DataProvider.getDevices(true);
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		thread.setName("device");
+		thread.start();
+
+		Thread thread2 = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
 				try {
-					
-					Thread.sleep(5000);
+					while (true) {
+						Display.getDefault().asyncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								populateDeviceTable();
+							}
+						});
+						Thread.sleep(5000);
+					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
-		thread.start();
+		thread2.setName("deviceDisplay");
+		thread2.start();
+	}
+
+	protected void populateDeviceTable() {
+		// TODO Auto-generated method stub
+		if (devices != null) {
+			table.removeAll();
+			String[][] datas = DataProvider.getDeviceTableFormat(devices);
+			for (String[] strings : datas) {
+				new TableItem(table, SWT.NONE).setText(strings);
+			}
+		}
+	}
+
+	protected void populateDeviceDetail(String mac) {
+		// TODO Auto-generated method stub
+		currentDevice = devices.get(mac);
+		if (currentDevice.getIpAddr() != null)
+			lblIp_1.setText(currentDevice.getIpAddr());
+		else
+			lblIp_1.setText("None");
+		
+		if (currentDevice.getMacAddr() != null)
+			lblMac_1.setText(currentDevice.getMacAddr());
+		else
+			lblMac_1.setText("None");
+		
+		if (currentDevice.getQosUuid() != null)
+			lblUuid_1.setText(currentDevice.getVmUuid());
+		else
+			lblUuid_1.setText("None");
+		
+		if (currentDevice.getVifNumber() != null)
+			lblVifPort_1.setText(currentDevice.getVifNumber());
+		else
+			lblVifPort_1.setText("None");
+		
+		if (currentDevice.getSwtichPort() != null)
+			lblSwitchport_1.setText(currentDevice.getSwtichPort());
+		else
+			lblSwitchport_1.setText("None");
+		
+		if (currentDevice.getSwitchDpid() != null)
+			lblAttachedswitch_1.setText(currentDevice.getSwitchDpid());
+		else
+			lblAttachedswitch_1.setText("None");
+
+		if (currentDevice.getQosUuid() != null)
+			lblQosInfo_1.setText(currentDevice.getQosUuid());
+		else
+			lblQosInfo_1.setText("None");
+		
+		
 	}
 
 	private void createContents() {
 		setLayout(new FormLayout());
 
 		table = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
+		table.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableItem[] items = table.getSelection();
+				if (items.length > 0) {
+					String mac = items[0].getText(2);
+					if (!mac.equals("None"))
+						populateDeviceDetail(mac);
+				}
+			}
+		});
 		FormData fd_table = new FormData();
 		fd_table.top = new FormAttachment(0, 10);
 		fd_table.left = new FormAttachment(0, 10);
@@ -156,24 +266,29 @@ public class CompositeDevices extends Composite {
 		lblSwitchport.setAlignment(SWT.RIGHT);
 		lblSwitchport.setText("SwitchPort : ");
 
-		Label lblQosInfo = new Label(grpDetail, SWT.NONE);
-		FormData fd_lblQosInfo = new FormData();
-		fd_lblQosInfo.right = new FormAttachment(0, 68);
-		fd_lblQosInfo.top = new FormAttachment(0, 69);
-		fd_lblQosInfo.left = new FormAttachment(0, 7);
-		lblQosInfo.setLayoutData(fd_lblQosInfo);
+		Label lblQosInfo = new Label(grpDetail, SWT.WRAP);
 		lblQosInfo.setAlignment(SWT.RIGHT);
+		FormData fd_lblQosInfo = new FormData();
+		fd_lblQosInfo.left = new FormAttachment(0, 17);
+		fd_lblQosInfo.top = new FormAttachment(0, 69);
+		lblQosInfo.setLayoutData(fd_lblQosInfo);
 		lblQosInfo.setText("QosInfo : ");
-
-		Label lblNewLabel = new Label(grpDetail, SWT.NONE);
-		FormData fd_lblNewLabel = new FormData();
-		fd_lblNewLabel.right = new FormAttachment(0, 135);
-		fd_lblNewLabel.top = new FormAttachment(0, 69);
-		fd_lblNewLabel.left = new FormAttachment(0, 74);
-		lblNewLabel.setLayoutData(fd_lblNewLabel);
-		lblNewLabel.setText("info");
+		
+		lblQosInfo_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblQosInfo_1 = new FormData();
+		fd_lblQosInfo_1.left = new FormAttachment(lblQosInfo, 6);
+		fd_lblQosInfo_1.bottom = new FormAttachment(lblQosInfo, 0, SWT.BOTTOM);
+		fd_lblQosInfo_1.right = new FormAttachment(100, -20);
+		fd_lblQosInfo_1.top = new FormAttachment(0, 69);
+		lblQosInfo_1.setLayoutData(fd_lblQosInfo_1);
+		lblQosInfo_1.setText("info");
 
 		Button btnAddQos = new Button(grpDetail, SWT.NONE);
+		btnAddQos.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		FormData fd_btnAddQos = new FormData();
 		fd_btnAddQos.bottom = new FormAttachment(0, 166);
 		fd_btnAddQos.right = new FormAttachment(20);
@@ -183,6 +298,11 @@ public class CompositeDevices extends Composite {
 		btnAddQos.setText("Add Qos");
 
 		Button btnClearqos = new Button(grpDetail, SWT.NONE);
+		btnClearqos.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		FormData fd_btnClearqos = new FormData();
 		fd_btnClearqos.bottom = new FormAttachment(0, 166);
 		fd_btnClearqos.right = new FormAttachment(40);
@@ -192,6 +312,11 @@ public class CompositeDevices extends Composite {
 		btnClearqos.setText("ClearQos");
 
 		Button btnAddqueue = new Button(grpDetail, SWT.NONE);
+		btnAddqueue.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		FormData fd_btnAddqueue = new FormData();
 		fd_btnAddqueue.bottom = new FormAttachment(0, 166);
 		fd_btnAddqueue.right = new FormAttachment(60);
@@ -201,6 +326,11 @@ public class CompositeDevices extends Composite {
 		btnAddqueue.setText("AddQueue");
 
 		Button btnAddstaticflow = new Button(grpDetail, SWT.NONE);
+		btnAddstaticflow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		FormData fd_btnAddstaticflow = new FormData();
 		fd_btnAddstaticflow.bottom = new FormAttachment(0, 166);
 		fd_btnAddstaticflow.right = new FormAttachment(80);
@@ -210,6 +340,11 @@ public class CompositeDevices extends Composite {
 		btnAddstaticflow.setText("AddStaticFlow");
 
 		Button btnAddvlan = new Button(grpDetail, SWT.NONE);
+		btnAddvlan.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		FormData fd_btnAddvlan = new FormData();
 		fd_btnAddvlan.bottom = new FormAttachment(0, 166);
 		fd_btnAddvlan.right = new FormAttachment(95);
@@ -217,6 +352,59 @@ public class CompositeDevices extends Composite {
 		fd_btnAddvlan.left = new FormAttachment(85);
 		btnAddvlan.setLayoutData(fd_btnAddvlan);
 		btnAddvlan.setText("AddVlan");
+
+		lblIp_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblIp_1 = new FormData();
+		fd_lblIp_1.right = new FormAttachment(lblMac);
+		fd_lblIp_1.top = new FormAttachment(0, 14);
+		fd_lblIp_1.bottom = new FormAttachment(lblIp, 0, SWT.BOTTOM);
+		fd_lblIp_1.left = new FormAttachment(lblIp, 6);
+		lblIp_1.setLayoutData(fd_lblIp_1);
+		lblIp_1.setText("IP1");
+
+		lblMac_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblMac_1 = new FormData();
+		fd_lblMac_1.right = new FormAttachment(lblVifPort);
+		fd_lblMac_1.top = new FormAttachment(0, 14);
+		fd_lblMac_1.bottom = new FormAttachment(lblIp, 0, SWT.BOTTOM);
+		fd_lblMac_1.left = new FormAttachment(lblMac, 6);
+		lblMac_1.setLayoutData(fd_lblMac_1);
+		lblMac_1.setText("MAC1");
+
+		lblVifPort_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblVifport = new FormData();
+		fd_lblVifport.left = new FormAttachment(lblVifPort, 6);
+		fd_lblVifport.right = new FormAttachment(100, -20);
+		fd_lblVifport.top = new FormAttachment(0, 14);
+		fd_lblVifport.bottom = new FormAttachment(lblIp, 0, SWT.BOTTOM);
+		lblVifPort_1.setLayoutData(fd_lblVifport);
+		lblVifPort_1.setText("VifPort1");
+
+		lblUuid_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblUuid_1 = new FormData();
+		fd_lblUuid_1.right = new FormAttachment(lblAttachedswitch);
+		fd_lblUuid_1.bottom = new FormAttachment(lblUuid, 0, SWT.BOTTOM);
+		fd_lblUuid_1.left = new FormAttachment(lblUuid, 6);
+		lblUuid_1.setLayoutData(fd_lblUuid_1);
+		lblUuid_1.setText("Uuid1");
+
+		lblAttachedswitch_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblAttachedswitch_1 = new FormData();
+		fd_lblAttachedswitch_1.right = new FormAttachment(lblSwitchport);
+		fd_lblAttachedswitch_1.bottom = new FormAttachment(lblAttachedswitch,
+				0, SWT.BOTTOM);
+		fd_lblAttachedswitch_1.left = new FormAttachment(lblAttachedswitch, 6);
+		lblAttachedswitch_1.setLayoutData(fd_lblAttachedswitch_1);
+		lblAttachedswitch_1.setText("AttachedSwitch1");
+
+		lblSwitchport_1 = new Label(grpDetail, SWT.NONE);
+		FormData fd_lblSwitchport_1 = new FormData();
+		fd_lblSwitchport_1.right = new FormAttachment(100, -20);
+		fd_lblSwitchport_1.bottom = new FormAttachment(lblAttachedswitch, 0,
+				SWT.BOTTOM);
+		fd_lblSwitchport_1.left = new FormAttachment(lblSwitchport, 6);
+		lblSwitchport_1.setLayoutData(fd_lblSwitchport_1);
+		lblSwitchport_1.setText("SwitchPort1");
 	}
 
 	@Override

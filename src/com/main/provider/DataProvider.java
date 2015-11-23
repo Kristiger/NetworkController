@@ -14,6 +14,7 @@ import com.main.app.qos.QosQueue;
 import com.main.app.qos.QosUtil;
 import com.main.app.qos.QueueUtil;
 import com.main.app.staticflow.json.StaticFlowManagerJSON;
+import com.tools.table.DeviceToTable;
 import com.tools.table.FlowToTable;
 import com.tools.table.PortToTable;
 import com.tools.util.JSONException;
@@ -49,9 +50,10 @@ public class DataProvider {
 		PORT = pORT;
 	}
 
-	public static Map<String, Device> getDevices() {
-		if (devices == null) {
-			devices = DeviceUtil.getDevices();
+	public static Map<String, Device> getDevices(boolean update)
+			throws JSONException {
+		if (devices == null || update) {
+			devices = DeviceUtil.getDevices(true);
 		}
 		return devices;
 	}
@@ -78,12 +80,15 @@ public class DataProvider {
 		return switches;
 	}
 
-	public static Switch getSwitch(String dpid) {
+	public static Switch getSwitch(String dpid) throws JSONException {
 		// TODO Auto-generated method stub
-		return switches.get(dpid);
+		if (switches != null) {
+			return switches.get(dpid);
+		}
+		return null;
 	}
 
-	public static void getSwitchUpdate(Switch sw) throws JSONException {
+	public static void updateSwitch(Switch sw) throws JSONException {
 		// TODO Auto-generated method stub
 		SwitchesJSON.updateSwitch(sw);
 	}
@@ -111,5 +116,19 @@ public class DataProvider {
 
 	public static Map<String, String> getControllerInfo() throws JSONException {
 		return ControllerJSON.getControllerInfo();
+	}
+
+	public static String[][] getDeviceTableFormat(Map<String, Device> devices) {
+		// TODO Auto-generated method stub
+		return DeviceToTable.deviceSummariesToTable(devices);
+	}
+
+	public static List<Flow> getRealFlows(String sw) throws IOException,
+			JSONException {
+		// TODO Auto-generated method stub
+		if (switches != null) {
+			return FlowJSON.getFlows(sw);
+		}
+		return new ArrayList<Flow>();
 	}
 }

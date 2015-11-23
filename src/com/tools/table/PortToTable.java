@@ -17,22 +17,22 @@ public class PortToTable {
 
 			for (Port port : ports) {
 				List<String> stringList = new ArrayList<String>();
+				stringList.add(count + 1 + "");
+				stringList.add(port.getName());
 				stringList.add(port.getPortNumber());
-				// stringList.add(port.getStatus());
-				stringList.add(FormatLong.formatPackets(Long.valueOf(port
-						.getTransmitBytes())));
-				stringList.add(FormatLong.formatPackets(Long.valueOf(port
-						.getReceiveBytes())));
 				stringList.add(FormatLong.formatPackets(Long.valueOf(port
 						.getTransmitPackets())));
 				stringList.add(FormatLong.formatPackets(Long.valueOf(port
+						.getTransmitBytes())));
+				stringList.add(FormatLong.formatPackets(Long.valueOf(port
 						.getReceivePackets())));
+				stringList.add(FormatLong.formatPackets(Long.valueOf(port
+						.getReceiveBytes())));
 				stringList.add(String.valueOf(Integer.valueOf(port
 						.getTransmitDropped())
 						+ Integer.valueOf(port.getReceiveDropped())));
 
 				stringList.add(port.getErrors());
-				stringList.add(port.getName());
 				arrData[count] = stringList.toArray(new String[stringList
 						.size()]);
 				count++;

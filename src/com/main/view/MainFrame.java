@@ -1,11 +1,15 @@
 package com.main.view;
 
+import java.awt.Toolkit;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -21,15 +25,14 @@ import com.main.provider.DataProvider;
 import com.main.view.util.SWTResourceManager;
 import com.tools.util.JSONException;
 
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
-
 public class MainFrame {
 
-	protected Shell shell;
+	protected static Shell shell;
+	private static final int WINWIDTH = 1260;
+	private static final int WINHEIGHT = 850;
 
 	private CompositeController cp_controller = null;
-	private CompositeSwitches cp_switches = null;
+	private CompositeSwitch cp_switches = null;
 	private CompositeDevices cp_devicees = null;
 	private CompositeQos cp_qos = null;
 	private CompositeFirewall cp_firewall = null;
@@ -66,19 +69,24 @@ public class MainFrame {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.CLOSE | SWT.MIN);
+
+		shell.setSize(WINWIDTH, WINHEIGHT);
+		shell.setLocation(new Point(
+				Toolkit.getDefaultToolkit().getScreenSize().width / 2
+						- WINWIDTH / 2, Toolkit.getDefaultToolkit()
+						.getScreenSize().height / 2 - WINHEIGHT / 2));
 		shell.addShellListener(new ShellAdapter() {
 			@Override
 			public void shellClosed(ShellEvent e) {
 				System.exit(0);
 			}
 		});
-		shell.setSize(1260, 850);
 		shell.setText("SWT Application");
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -104,9 +112,9 @@ public class MainFrame {
 		fd_composite_2.right = new FormAttachment(0, 1244);
 		composite_2.setLayoutData(fd_composite_2);
 
-		final Tree tree = new Tree(composite_1, SWT.BORDER);
-		tree.setFont(SWTResourceManager.getFont("Microsoft YaHei UI", 10,
-				SWT.NORMAL));
+		final Tree tree = new Tree(composite_1, SWT.BORDER | SWT.NO_FOCUS);
+		tree.setFont(org.eclipse.wb.swt.SWTResourceManager.getFont(
+				"Microsoft YaHei UI", 9, SWT.NORMAL));
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -130,6 +138,9 @@ public class MainFrame {
 										SWT.NONE);
 								item.setText(sw.getDpid());
 							}
+							if (trtmSwitches.getItems().length != 0) {
+								trtmSwitches.setExpanded(true);
+							}
 						}
 					} else if (items[0].getText().equals("Devices")) {
 						if (cp_devicees == null) {
@@ -142,7 +153,7 @@ public class MainFrame {
 						if (cp_qos == null) {
 							cp_qos = new CompositeQos(composite_2, SWT.NONE);
 						}
-						stackLayout.topControl = cp_switches;
+						stackLayout.topControl = cp_qos;
 						composite_2.layout();
 					} else if (items[0].getText().equals("Firewall")) {
 						if (cp_firewall == null) {
@@ -160,7 +171,7 @@ public class MainFrame {
 						composite_2.layout();
 					} else if (items[0].getText().length() == 23) {
 						if (cp_switches == null) {
-							cp_switches = new CompositeSwitches(composite_2,
+							cp_switches = new CompositeSwitch(composite_2,
 									SWT.NONE);
 						}
 						cp_switches.setCurrentSwitch(switches.get(items[0]
@@ -199,5 +210,13 @@ public class MainFrame {
 		TreeItem trtmPushflow = new TreeItem(trtmApplications, SWT.NONE);
 		trtmPushflow.setText("StaticFlow");
 		trtmApplications.setExpanded(true);
+
+		cp_controller = new CompositeController(composite_2, SWT.None);
+		stackLayout.topControl = cp_controller;
+	}
+
+	public static Shell getShell() {
+		// TODO Auto-generated method stub
+		return shell;
 	}
 }

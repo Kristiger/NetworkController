@@ -1,10 +1,19 @@
 package com.basic.elements;
 
+import java.util.Date;
+
 public class Device {
 	private String vifNumber, ipAddr, macAddr, swtichPort, switchDpid, qosUuid,
-			vmUuid;
+			vmUuid, vifUuid;
 	
 	private boolean isActive = false;
+
+	private Date lastSeen;
+
+	public Device(String mac) {
+		// TODO Auto-generated constructor stub
+		this.setMacAddr(mac);
+	}
 
 	public String getVifNumber() {
 		return vifNumber;
@@ -62,6 +71,22 @@ public class Device {
 		this.vmUuid = vmUuid;
 	}
 
+	public String getVifUuid() {
+		return vifUuid;
+	}
+
+	public void setVifUuid(String vifUuid) {
+		this.vifUuid = vifUuid;
+	}
+
+	public Date getLastSeen() {
+		return lastSeen;
+	}
+
+	public void setLastSeen(Date lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+
 	public boolean isActive() {
 		return isActive;
 	}
@@ -77,5 +102,4 @@ public class Device {
 				+ ", switchDpid=" + switchDpid + ", qosUuid=" + qosUuid
 				+ ", vmUuid=" + vmUuid + "]";
 	}
-	
 }

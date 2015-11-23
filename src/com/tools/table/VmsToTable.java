@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import model.overview.VmData;
-import controller.overview.vms.VmDataGetter;
+import com.basic.elements.VmData;
 
 public class VmsToTable {
 	public static String[][] vmdatasToTable(List<VmData> vms) {

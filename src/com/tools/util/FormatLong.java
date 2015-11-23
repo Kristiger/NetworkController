@@ -13,7 +13,7 @@ public class FormatLong {
 		if (paramLong >= 1000L) {
 			return paramLong / 1000L + " KB";
 		}
-		return "" + paramLong;
+		return paramLong + "B";
 	}
 	
 	/* Formats longs for proper representation in the paint */
@@ -54,6 +54,6 @@ public class FormatLong {
 		if (paramLong >= 1000L) {
 			return paramLong / 1000L + " KB";
 		}
-		return "" + paramLong;
+		return paramLong + "B";
 	}
 }

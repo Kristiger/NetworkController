@@ -20,7 +20,7 @@ import com.tools.util.JSONObject;
 public class FlowManagerPusher {
 
 	static String IP = DataProvider.getIP();
-	static String PORT = DataProvider.getPort();
+	static String PORT = DataProvider.getPORT();
 
 	public static String push(Flow flow) throws IOException, JSONException {
 
@@ -57,7 +57,7 @@ public class FlowManagerPusher {
 			// Get actual flows, we pass null as first parameter
 			// to denote that we are not supplying a JSON object
 			List<Flow> actualFlows = DataProvider.getRealFlows(
-					flow.getSwitch(), true);
+					flow.getSwitch());
 			// Compare the flow you just pushed with those actually on the
 			// switch
 			// If found, success message printed.
@@ -124,11 +124,12 @@ public class FlowManagerPusher {
 
 	// Checks the entries for valid values
 	public static boolean errorChecksPassed(String p) {
-		if (!p.equals("") && !ErrorCheck.isNumeric(p)) {
+		return true;
+		/*if (!p.equals("") && !ErrorCheck.isNumeric(p)) {
 			DisplayMessage.displayError(StaticFlowManager.getShell(),
 					"Priority must be a valid number.");
 			return false;
 		} else
-			return true;
+			return true;*/
 	}
 }

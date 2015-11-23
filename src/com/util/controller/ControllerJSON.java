@@ -111,7 +111,7 @@ public class ControllerJSON {
 			try {
 				String key = (String) myIter.next();
 				if (obj.get(key) instanceof JSONObject) {
-					modules = modules.concat(key + "\t\t");
+					modules = modules.concat(key + "\t");
 				}
 			} catch (Exception e) {
 				// Fail silently

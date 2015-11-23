@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.TableItem;
 import com.basic.elements.Action;
 import com.basic.elements.Port;
 import com.basic.elements.Switch;
+import com.main.view.MainFrame;
 import com.main.view.util.DisplayMessage;
 import com.tools.util.ErrorCheck;
 
@@ -73,7 +74,7 @@ public class ActionToTable {
 			checkPorts = true;
 			if (!ErrorCheck.isNumeric(items[0].getText(1))) {
 				DisplayMessage
-						.displayError(StaticFlowManager.getShell(),
+						.displayError(MainFrame.getShell(),
 								"The value number must be an integer. Please check your entry.");
 				return false;
 			}
@@ -83,7 +84,7 @@ public class ActionToTable {
 			if (!ErrorCheck.isNumeric(items[0].getText(1))
 					|| !ErrorCheck.isNumeric(items[1].getText(1))) {
 				DisplayMessage
-						.displayError(StaticFlowManager.getShell(),
+						.displayError(MainFrame.getShell(),
 								"The value number must be an integer. Please check your entry.");
 				return false;
 			}
@@ -93,7 +94,7 @@ public class ActionToTable {
 				|| action.getType().equals("set-dst-mac")) {
 			if (!ErrorCheck.isMac(items[0].getText(1))) {
 				DisplayMessage
-						.displayError(StaticFlowManager.getShell(),
+						.displayError(MainFrame.getShell(),
 								"The value number must be a proper MAC address. Please check your entry.");
 				return false;
 			}
@@ -103,7 +104,7 @@ public class ActionToTable {
 				|| action.getType().equals("set-dst-ip")) {
 			if (!ErrorCheck.isIP(items[0].getText(1))) {
 				DisplayMessage
-						.displayError(StaticFlowManager.getShell(),
+						.displayError(MainFrame.getShell(),
 								"The value number must be a proper IP address. Please check your entry.");
 				return false;
 			}
@@ -116,7 +117,7 @@ public class ActionToTable {
 					return true;
 				}
 			}
-			DisplayMessage.displayError(StaticFlowManager.getShell(),
+			DisplayMessage.displayError(MainFrame.getShell(),
 					"That port does not exist on the switch!");
 			return false;
 		}
