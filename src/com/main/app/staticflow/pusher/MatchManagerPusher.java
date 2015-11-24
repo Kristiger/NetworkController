@@ -15,6 +15,7 @@ public class MatchManagerPusher {
 			match.setDataLayerSource(items[1].getText(1));
 		if (!items[2].getText(1).isEmpty()) {
 			// Check and see if they entire it as a hex value (ie. 0x800)
+			//System.out.println(items[2].getText(1));
 			if (!items[2].getText(1).contains("x"))
 				match.setDataLayerType(String.valueOf(Integer.parseInt(
 						items[2].getText(1), 16)));
@@ -46,7 +47,7 @@ public class MatchManagerPusher {
 				&& match.getDataLayerType() == null)
 			match.setDataLayerType("0x0800");
 
-		System.out.println(match.serialize());
+		//System.out.println(match.serialize());
 		return match;
 	}
 

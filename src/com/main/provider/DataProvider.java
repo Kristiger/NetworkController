@@ -109,8 +109,12 @@ public class DataProvider {
 		return FlowJSON.getFlows(dpid);
 	}
 
-	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid, boolean b) {
+	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid,
+			boolean b) throws IOException, JSONException {
 		// TODO Auto-generated method stub
+		if(b){
+			return StaticFlowManagerJSON.getFlows(currentSwtichDpid);
+		}
 		return staticFlows;
 	}
 

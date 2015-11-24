@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -24,10 +26,10 @@ public class StaticFlowManagerJSON {
 	static Future<Object> future;
 
 	// This parses JSON from the restAPI to get all the flows from a switch
-	public static List<Flow> getFlows(String sw) throws IOException,
+	public static Map<String, Flow> getFlows(String sw) throws IOException,
 			JSONException {
 
-		List<Flow> flows = new ArrayList<Flow>();
+		Map<String, Flow> flows = new ConcurrentHashMap<String, Flow>();
 
 		// Get the string names of all the specified switch's flows
 		future = Deserializer.readJsonObjectFromURL("http://" + IP
@@ -72,7 +74,7 @@ public class StaticFlowManagerJSON {
 										.getMatch(sw, key));
 								flow.setPriority(String.valueOf(obj
 										.getInt("priority")));
-								flows.add(flow);
+								flows.put(flow.getName(),flow);
 
 								// debug
 								System.out.println(flow.serialize());
