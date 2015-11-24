@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.basic.elements.Switch;
 import com.main.provider.DataProvider;
-import com.main.view.util.SWTResourceManager;
 import com.tools.util.JSONException;
 
 public class MainFrame {

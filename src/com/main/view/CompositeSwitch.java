@@ -287,23 +287,23 @@ public class CompositeSwitch extends Composite {
 		tblclmnPriority.setText("Priority");
 
 		TableColumn tblclmnMatch = new TableColumn(tableFlow, SWT.NONE);
-		tblclmnMatch.setWidth(455);
+		tblclmnMatch.setWidth(567);
 		tblclmnMatch.setText("Match");
 
 		TableColumn tblclmnAction = new TableColumn(tableFlow, SWT.NONE);
-		tblclmnAction.setWidth(125);
+		tblclmnAction.setWidth(120);
 		tblclmnAction.setText("Action");
 
 		TableColumn tblclmnPackets = new TableColumn(tableFlow, SWT.NONE);
 		tblclmnPackets.setText("Packets");
-		tblclmnPackets.setWidth(100);
+		tblclmnPackets.setWidth(65);
 
 		tblclmnBytes = new TableColumn(tableFlow, SWT.NONE);
-		tblclmnBytes.setWidth(100);
+		tblclmnBytes.setWidth(61);
 		tblclmnBytes.setText("Bytes");
 
 		tblclmnTimeout = new TableColumn(tableFlow, SWT.NONE);
-		tblclmnTimeout.setWidth(100);
+		tblclmnTimeout.setWidth(58);
 		tblclmnTimeout.setText("Timeout");
 	}
 

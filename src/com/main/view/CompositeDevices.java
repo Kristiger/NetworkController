@@ -18,9 +18,12 @@ import org.eclipse.swt.widgets.TableItem;
 import com.basic.elements.Device;
 import com.main.provider.DataProvider;
 import com.tools.util.JSONException;
+import com.util.xen.XenTools;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.RowData;
 
 public class CompositeDevices extends Composite {
 	private Table table;
@@ -117,27 +120,27 @@ public class CompositeDevices extends Composite {
 			lblIp_1.setText(currentDevice.getIpAddr());
 		else
 			lblIp_1.setText("None");
-		
+
 		if (currentDevice.getMacAddr() != null)
 			lblMac_1.setText(currentDevice.getMacAddr());
 		else
 			lblMac_1.setText("None");
-		
+
 		if (currentDevice.getVmUuid() != null)
 			lblUuid_1.setText(currentDevice.getVmUuid());
 		else
 			lblUuid_1.setText("None");
-		
+
 		if (currentDevice.getVifNumber() != null)
 			lblVifPort_1.setText(currentDevice.getVifNumber());
 		else
 			lblVifPort_1.setText("None");
-		
+
 		if (currentDevice.getSwtichPort() != null)
 			lblSwitchport_1.setText(currentDevice.getSwtichPort());
 		else
 			lblSwitchport_1.setText("None");
-		
+
 		if (currentDevice.getSwitchDpid() != null)
 			lblAttachedswitch_1.setText(currentDevice.getSwitchDpid());
 		else
@@ -147,8 +150,7 @@ public class CompositeDevices extends Composite {
 			lblQosInfo_1.setText(currentDevice.getQosUuid());
 		else
 			lblQosInfo_1.setText("None");
-		
-		
+
 	}
 
 	private void createContents() {
@@ -213,6 +215,8 @@ public class CompositeDevices extends Composite {
 		fd_grpDetail.right = new FormAttachment(100, -10);
 		grpDetail.setLayoutData(fd_grpDetail);
 
+		table.setSortColumn(table.getColumn(2));
+
 		Label lblIp = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblIp = new FormData();
 		fd_lblIp.right = new FormAttachment(0, 68);
@@ -274,7 +278,7 @@ public class CompositeDevices extends Composite {
 		fd_lblQosInfo.top = new FormAttachment(0, 69);
 		lblQosInfo.setLayoutData(fd_lblQosInfo);
 		lblQosInfo.setText("QosInfo : ");
-		
+
 		lblQosInfo_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblQosInfo_1 = new FormData();
 		fd_lblQosInfo_1.left = new FormAttachment(lblQosInfo, 6);
@@ -283,80 +287,6 @@ public class CompositeDevices extends Composite {
 		fd_lblQosInfo_1.top = new FormAttachment(0, 69);
 		lblQosInfo_1.setLayoutData(fd_lblQosInfo_1);
 		lblQosInfo_1.setText("info");
-
-		Button btnAddQos = new Button(grpDetail, SWT.NONE);
-		btnAddQos.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				MainFrame.getMainStackLayout().topControl = MainFrame.getCp_qos();
-				parent.layout();
-			}
-		});
-		FormData fd_btnAddQos = new FormData();
-		fd_btnAddQos.bottom = new FormAttachment(0, 166);
-		fd_btnAddQos.right = new FormAttachment(20);
-		fd_btnAddQos.top = new FormAttachment(0, 131);
-		fd_btnAddQos.left = new FormAttachment(5);
-		btnAddQos.setLayoutData(fd_btnAddQos);
-		btnAddQos.setText("Add Qos");
-
-		Button btnClearqos = new Button(grpDetail, SWT.NONE);
-		btnClearqos.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-		FormData fd_btnClearqos = new FormData();
-		fd_btnClearqos.bottom = new FormAttachment(0, 166);
-		fd_btnClearqos.right = new FormAttachment(40);
-		fd_btnClearqos.top = new FormAttachment(0, 131);
-		fd_btnClearqos.left = new FormAttachment(25);
-		btnClearqos.setLayoutData(fd_btnClearqos);
-		btnClearqos.setText("ClearQos");
-
-		Button btnAddqueue = new Button(grpDetail, SWT.NONE);
-		btnAddqueue.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-		FormData fd_btnAddqueue = new FormData();
-		fd_btnAddqueue.bottom = new FormAttachment(0, 166);
-		fd_btnAddqueue.right = new FormAttachment(60);
-		fd_btnAddqueue.top = new FormAttachment(0, 131);
-		fd_btnAddqueue.left = new FormAttachment(45);
-		btnAddqueue.setLayoutData(fd_btnAddqueue);
-		btnAddqueue.setText("AddQueue");
-
-		Button btnAddstaticflow = new Button(grpDetail, SWT.NONE);
-		btnAddstaticflow.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				MainFrame.getMainStackLayout().topControl = MainFrame.getCp_staticflow();
-				parent.layout();
-			}
-		});
-		FormData fd_btnAddstaticflow = new FormData();
-		fd_btnAddstaticflow.bottom = new FormAttachment(0, 166);
-		fd_btnAddstaticflow.right = new FormAttachment(80);
-		fd_btnAddstaticflow.top = new FormAttachment(0, 131);
-		fd_btnAddstaticflow.left = new FormAttachment(65);
-		btnAddstaticflow.setLayoutData(fd_btnAddstaticflow);
-		btnAddstaticflow.setText("AddStaticFlow");
-
-		Button btnAddvlan = new Button(grpDetail, SWT.NONE);
-		btnAddvlan.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-		FormData fd_btnAddvlan = new FormData();
-		fd_btnAddvlan.bottom = new FormAttachment(0, 166);
-		fd_btnAddvlan.right = new FormAttachment(95);
-		fd_btnAddvlan.top = new FormAttachment(0, 131);
-		fd_btnAddvlan.left = new FormAttachment(85);
-		btnAddvlan.setLayoutData(fd_btnAddvlan);
-		btnAddvlan.setText("AddVlan");
 
 		lblIp_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblIp_1 = new FormData();
@@ -410,6 +340,57 @@ public class CompositeDevices extends Composite {
 		fd_lblSwitchport_1.left = new FormAttachment(lblSwitchport, 6);
 		lblSwitchport_1.setLayoutData(fd_lblSwitchport_1);
 		lblSwitchport_1.setText("SwitchPort1");
+
+		Composite composite = new Composite(grpDetail, SWT.BORDER);
+		RowLayout rl_composite = new RowLayout(SWT.HORIZONTAL);
+		rl_composite.fill = true;
+		rl_composite.center = true;
+		rl_composite.justify = true;
+		rl_composite.marginTop = 10;
+		rl_composite.marginLeft = 15;
+		composite.setLayout(rl_composite);
+		FormData fd_composite = new FormData();
+		fd_composite.top = new FormAttachment(100, -70);
+		fd_composite.left = new FormAttachment(0, 10);
+		fd_composite.right = new FormAttachment(100, -10);
+		fd_composite.bottom = new FormAttachment(100, -10);
+		composite.setLayoutData(fd_composite);
+
+		Button btnAddQos = new Button(composite, SWT.NONE);
+		btnAddQos.setLayoutData(new RowData(100, 40));
+		btnAddQos.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CompositeQos cp_qos = MainFrame.getCp_qos();
+				if (currentDevice != null)
+					cp_qos.setDevice(currentDevice);
+				MainFrame.getMainStackLayout().topControl = cp_qos;
+				parent.layout();
+			}
+		});
+		btnAddQos.setText("Add Qos");
+
+		Button btnClearqos = new Button(composite, SWT.NONE);
+		btnClearqos.setLayoutData(new RowData(100, 40));
+		btnClearqos.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				XenTools.clearPortQos(currentDevice.getVifNumber());
+			}
+		});
+		btnClearqos.setText("ClearQos");
+
+		Button btnAddstaticflow = new Button(composite, SWT.NONE);
+		btnAddstaticflow.setLayoutData(new RowData(100, 40));
+		btnAddstaticflow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				MainFrame.getMainStackLayout().topControl = MainFrame
+						.getCp_staticflow();
+				parent.layout();
+			}
+		});
+		btnAddstaticflow.setText("AddStaticFlow");
 	}
 
 	@Override

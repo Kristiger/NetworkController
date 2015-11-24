@@ -1,6 +1,7 @@
 package com.tools.table;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.basic.elements.Flow;
@@ -13,6 +14,7 @@ public class FlowToTable {
 	public static String[][] getFlowTableFormat(List<Flow> flows) {
 
 		if (flows != null) {
+			Collections.sort(flows);
 			int count = 0;
 			String[][] arrData = new String[flows.size()][8];
 

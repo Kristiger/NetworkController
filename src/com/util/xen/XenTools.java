@@ -39,12 +39,13 @@ public class XenTools {
 			log.info("Error occured :" + result.get(0));
 			return null;
 		}
-		if(result.get(0).contains("ovs-vsctl")){
+		if (result.get(0).contains("ovs-vsctl")) {
 			log.severe("uuid is not get and server returned error.");
 			return null;
 		}
 		return result.get(0);
 	}
+
 	public static void destroyRecord(String table, String uuid) {
 		String command = "ovs-vsctl destroy " + table + " " + uuid;
 		List<String> result = new SSHConnector().exec(command);
@@ -53,7 +54,7 @@ public class XenTools {
 		}
 	}
 
-	public static void removeQosQueue(String qosUuid, String queueId) {
+	public static void removeQosQueue(String qosUuid, int queueId) {
 		String command = "ovs-vsctl remove qos " + qosUuid + " queues "
 				+ queueId;
 		List<String> result = new SSHConnector().exec(command);
@@ -115,11 +116,11 @@ public class XenTools {
 			log.info("Error occured :" + result.get(0));
 		}
 	}
-	
-	public static void clearPortQos(String portId){
+
+	public static void clearPortQos(String portId) {
 		String command = "ovs-vsctl clear port " + portId + " qos";
 		List<String> result = new SSHConnector().exec(command);
-		if(result.size() != 0){
+		if (result.size() != 0) {
 			log.info("Error occured :" + result.get(0));
 		}
 	}
@@ -143,12 +144,14 @@ public class XenTools {
 			return result;
 		}
 		String str = result.get(0);
-
 		result = new ArrayList<String>();
-		result.add(str.substring(str.indexOf("xs-vm-uuid") + 13,
-				str.indexOf("}") - 1));
-		result.add(str.substring(str.indexOf("xs-vif-uuid") + 14,
-				str.indexOf("xs-vm-uuid") - 3));
+		// maybe [external_ids        : {}]
+		if (!str.contains("ovs-vsctl") && str.length() > 25) {
+			result.add(str.substring(str.indexOf("xs-vm-uuid") + 13,
+					str.indexOf("}") - 1));
+			result.add(str.substring(str.indexOf("xs-vif-uuid") + 14,
+					str.indexOf("xs-vm-uuid") - 3));
+		}
 		return result;
 	}
 

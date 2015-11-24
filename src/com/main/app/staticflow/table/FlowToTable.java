@@ -1,7 +1,5 @@
 package com.main.app.staticflow.table;
 
-import java.util.List;
-
 import com.basic.elements.Flow;
 
 public class FlowToTable {

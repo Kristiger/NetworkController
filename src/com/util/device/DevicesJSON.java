@@ -38,14 +38,18 @@ public class DevicesJSON {
 					.readJsonArrayFromURL("http://" + IP + ":" + PORT
 							+ "/wm/device/");
 			JSONArray json = (JSONArray) devices.get(5, TimeUnit.SECONDS);
-
+			
+			if(json == null){
+				return devs;
+			}
 			for (int i = 0; i < json.length(); i++) {
 				obj = json.getJSONObject(i);
 
+				// set port >= 1 to remove hosts not in xen server
 				if (obj.getJSONArray("ipv4").isNull(0)
 						|| obj.getJSONArray("attachmentPoint").isNull(0)
 						|| obj.getJSONArray("attachmentPoint").getJSONObject(0)
-								.getInt("port") <= 1) {
+								.getInt("port") < 1) {
 					continue;
 				}
 

@@ -14,6 +14,11 @@ public class QosQueue {
 		this.maxRate = maxRate;
 	}
 	
+	public QosQueue(String uuid, long minRate, long maxRate){
+		this(minRate,maxRate);
+		this.uuid = uuid;
+	}
+	
 	public String getUuid() {
 		return uuid;
 	}

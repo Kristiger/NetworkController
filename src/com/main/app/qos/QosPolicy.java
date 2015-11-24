@@ -1,10 +1,5 @@
 package com.main.app.qos;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +17,7 @@ public class QosPolicy {
 	public QosPolicy() {
 		queues = new ConcurrentHashMap<Integer, String>();
 		for (int i = 0; i < 7; i++) {
-			queues.put(i, null);
+			queues.put(i, "");
 		}
 	}
 

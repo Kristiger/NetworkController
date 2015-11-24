@@ -109,7 +109,7 @@ public class DataProvider {
 		return FlowJSON.getFlows(dpid);
 	}
 
-	public static Map<String, Flow> getStaticFlows() {
+	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid, boolean b) {
 		// TODO Auto-generated method stub
 		return staticFlows;
 	}

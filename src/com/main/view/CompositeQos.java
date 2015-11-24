@@ -1,30 +1,47 @@
 package com.main.view;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import com.basic.elements.Device;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import com.main.app.qos.QosPolicy;
+import com.main.app.qos.QosQueue;
+import com.main.provider.DataProvider;
+import com.main.view.util.DisplayMessage;
+import com.tools.util.JSONException;
+import com.util.xen.XenTools;
 
 public class CompositeQos extends Composite {
 
+	private Text textUpload;
+	private Text textDownload;
+	private Text textMaxRate;
+	private Text textMinRate;
+	private Text textDelMax;
+	private Text textDelMin;
+	private Text textVlan;
+	private Combo comboDevice;
+	private Label lblIp;
+	private Label lblMac;
 	private Device device = null;
-	private Text text;
-	private Text text_1;
-	private Text text_2;
-	private Text text_3;
-	private Text text_4;
-	private Text text_5;
-	private Text text_6;
+	private Map<String, Device> devices = null;
+	private Combo comboDelete;
+	private QosQueue queue;
+	private QosPolicy qos;
 
 	/**
 	 * Create the composite.
@@ -35,26 +52,179 @@ public class CompositeQos extends Composite {
 	public CompositeQos(Composite parent, int style) {
 		super(parent, style);
 		createContents();
+
+		try {
+			devices = DataProvider.getDevices(false);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		populateDeviceCombo();
 	}
 
-	public CompositeQos(Composite parent, int style, Device device) {
-		this(parent, style);
+	public void setDevice(Device device) {
 		this.device = device;
+		String[] items = comboDevice.getItems();
+		for (int i = 0; i < items.length; i++) {
+			if (items[i].equals(device.getMacAddr())) {
+				comboDevice.select(i);
+				break;
+			}
+		}
+		populateDevice(device.getMacAddr());
 	}
-	
+
+	protected void populateDevice(String mac) {
+		// TODO Auto-generated method stub
+		if (!mac.equals("None")) {
+			device = devices.get(mac);
+			if (device != null) {
+				lblIp.setText(device.getIpAddr());
+				lblMac.setText(device.getMacAddr());
+			}
+		}
+	}
+
+	private void populateDeviceCombo() {
+		// TODO Auto-generated method stub
+		String[] data = devices.keySet().toArray(
+				new String[devices.keySet().size()]);
+		if (data.length > 0) {
+			comboDevice.setItems(data);
+			device = devices.get(data[0]);
+		} else {
+			comboDevice.setItem(0, "None");
+		}
+		comboDevice.select(0);
+		populateRateLimit();
+	}
+
+	private void populateRateLimit() {
+		// TODO Auto-generated method stub
+		if (device != null && device.getUploadRate() != null) {
+			textUpload.setText(device.getUploadRate());
+		}
+		populateQosQueues();
+	}
+
 	protected void submitRateLimit() {
 		// TODO Auto-generated method stub
-
+		if (device != null) {
+			if (!textUpload.getText().equals("")&& textUpload.getText() != null) {
+				try {
+					Long upload = Long.parseLong(textUpload.getText());
+					if (upload > 0)
+						XenTools.setUploadRate(device.getVifNumber(), upload,
+								100);
+					device.setUploadRate(String.valueOf(upload));
+				} catch (NumberFormatException e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			}
+			if (!textDownload.getText().equals("")) {
+				try {
+					long download = Long.parseLong(textDownload.getText()) * 1000;
+					if (download > 0) {
+						String qosUuid = XenTools.createRow("qos", download,
+								download);
+						if (qosUuid != null) {
+							XenTools.setPortQos(device.getVifNumber(), qosUuid);
+							DataProvider.getQoses().put(qosUuid,
+									new QosPolicy(download, download));
+							device.setQosUuid(qosUuid);
+						}
+					}
+				} catch (NumberFormatException e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	protected void addQueueToCurrentDevice() {
 		// TODO Auto-generated method stub
-
+		if (device != null && device.getQosUuid() != null) {
+			if (!textMaxRate.getText().equals("")
+					&& !textMinRate.getText().equals("")) {
+				try {
+					Long max = Long.parseLong(textMaxRate.getText());
+					Long min = Long.parseLong(textMinRate.getText());
+					if (max > 0 && min > 0 && min <= max) {
+						String queueUuid = XenTools
+								.createRow("queue", max, min);
+						if (queueUuid != null) {
+							QosPolicy qoses = DataProvider.getQoses().get(
+									device.getQosUuid());
+							Map<Integer, String> queues = qoses.getQueues();
+							for (int i : queues.keySet()) {
+								if (queues.get(i).equals("")) {
+									queues.remove(i);
+									queues.put(i, queueUuid);
+									DataProvider.getQueues().put(queueUuid,
+											new QosQueue(queueUuid, max, min));
+									XenTools.addQosQueue(device.getQosUuid(),
+											i, queueUuid);
+									return;
+								}
+							}
+							DisplayMessage.displayError(MainFrame.getShell(),
+									"Queues are full.");
+						}
+					}
+				} catch (NumberFormatException e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	protected void deleteQueueFromQos() {
 		// TODO Auto-generated method stub
+		int index = comboDelete.getSelectionIndex();
+		String[] items = comboDelete.getItems();
+		if (index > -1 && !items[index].equals("None")) {
+			int id = Integer.valueOf(items[index]);
+			DataProvider.getQueues().remove(queue.getUuid());
+			XenTools.removeQosQueue(qos.getUuid(), id);
+		}
+	}
 
+	protected void populateQosQueues() {
+		// TODO Auto-generated method stub
+		if (device != null && device.getQosUuid() != null) {
+			// get all queues from the specific qos
+			qos = DataProvider.getQoses().get(device.getQosUuid());
+			Map<Integer, String> queues = qos.getQueues();
+			// ids used for store queue id
+			List<Integer> ids = new ArrayList<Integer>();
+			for (Integer i : queues.keySet()) {
+				if (!queues.get(i).equals("")) {
+					ids.add(i);
+				}
+			}
+			// fill into combo box
+			if (ids.size() > 0) {
+				String[] data = ids.toArray(new String[ids.size()]);
+				comboDelete.setItems(data);
+				comboDelete.select(0);
+				populateQueue(0);
+			} else {
+				comboDelete.setItems(new String[] { "None" });
+			}
+		}
+	}
+
+	private void populateQueue(int i) {
+		// TODO Auto-generated method stub
+		if (device != null) {
+			String queueUuid = qos.getQueues().get(i);
+			queue = DataProvider.getQueues().get(queueUuid);
+			textDelMax.setText(String.valueOf(queue.getMaxRate()));
+			textDelMin.setText(String.valueOf(queue.getMinRate()));
+		}
 	}
 
 	protected void setDeviceVlan() {
@@ -88,8 +258,18 @@ public class CompositeQos extends Composite {
 		fd_grpChoosedevice.right = new FormAttachment(100);
 		grpChoosedevice.setLayoutData(fd_grpChoosedevice);
 
-		Combo combo = new Combo(grpChoosedevice, SWT.READ_ONLY);
-		combo.setBounds(10, 25, 120, 23);
+		comboDevice = new Combo(grpChoosedevice, SWT.READ_ONLY);
+		comboDevice.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int index = comboDevice.getSelectionIndex();
+				String item = comboDevice.getItem(index);
+				if (index > -1) {
+					populateDevice(item);
+				}
+			}
+		});
+		comboDevice.setBounds(10, 25, 120, 23);
 
 		Group grpRatelimit = new Group(composite, SWT.NONE);
 		grpRatelimit.setText("RateLimit");
@@ -106,8 +286,8 @@ public class CompositeQos extends Composite {
 		lblUpload.setBounds(40, 37, 55, 15);
 		lblUpload.setText("Upload : ");
 
-		text = new Text(grpRatelimit, SWT.BORDER);
-		text.setBounds(106, 34, 118, 21);
+		textUpload = new Text(grpRatelimit, SWT.BORDER);
+		textUpload.setBounds(106, 34, 118, 21);
 
 		Label lblKb = new Label(grpRatelimit, SWT.NONE);
 		lblKb.setBounds(230, 37, 21, 15);
@@ -118,8 +298,8 @@ public class CompositeQos extends Composite {
 		lblDownload.setAlignment(SWT.RIGHT);
 		lblDownload.setBounds(280, 37, 69, 15);
 
-		text_1 = new Text(grpRatelimit, SWT.BORDER);
-		text_1.setBounds(355, 34, 118, 21);
+		textDownload = new Text(grpRatelimit, SWT.BORDER);
+		textDownload.setBounds(355, 34, 118, 21);
 
 		Label label = new Label(grpRatelimit, SWT.NONE);
 		label.setText("Kb");
@@ -147,8 +327,8 @@ public class CompositeQos extends Composite {
 		lblMaxrate.setBounds(40, 37, 55, 15);
 		lblMaxrate.setText("MaxRate  : ");
 
-		text_2 = new Text(grpAddqueue, SWT.BORDER);
-		text_2.setBounds(106, 34, 118, 21);
+		textMaxRate = new Text(grpAddqueue, SWT.BORDER);
+		textMaxRate.setBounds(106, 34, 118, 21);
 
 		Label label_1 = new Label(grpAddqueue, SWT.NONE);
 		label_1.setText("Kb");
@@ -158,8 +338,8 @@ public class CompositeQos extends Composite {
 		lblMinrate.setText("MinRate  : ");
 		lblMinrate.setBounds(292, 37, 55, 15);
 
-		text_3 = new Text(grpAddqueue, SWT.BORDER);
-		text_3.setBounds(355, 34, 118, 21);
+		textMinRate = new Text(grpAddqueue, SWT.BORDER);
+		textMinRate.setBounds(355, 34, 118, 21);
 
 		Label label_3 = new Label(grpAddqueue, SWT.NONE);
 		label_3.setText("Kb");
@@ -186,16 +366,16 @@ public class CompositeQos extends Composite {
 				SWT.LEFT);
 		grpDeletequeue.setLayoutData(fd_grpDeletequeue);
 
-		Combo combo_1 = new Combo(grpDeletequeue, SWT.READ_ONLY);
-		combo_1.setBounds(38, 27, 103, 23);
+		comboDelete = new Combo(grpDeletequeue, SWT.READ_ONLY);
+		comboDelete.setBounds(38, 27, 103, 23);
 
 		Label label_2 = new Label(grpDeletequeue, SWT.NONE);
 		label_2.setText("MaxRate  : ");
 		label_2.setBounds(169, 33, 55, 15);
 
-		text_4 = new Text(grpDeletequeue, SWT.BORDER);
-		text_4.setEditable(false);
-		text_4.setBounds(235, 30, 118, 21);
+		textDelMax = new Text(grpDeletequeue, SWT.BORDER);
+		textDelMax.setEditable(false);
+		textDelMax.setBounds(235, 30, 118, 21);
 
 		Label label_4 = new Label(grpDeletequeue, SWT.NONE);
 		label_4.setText("Kb");
@@ -205,9 +385,9 @@ public class CompositeQos extends Composite {
 		label_5.setText("MinRate  : ");
 		label_5.setBounds(421, 33, 55, 15);
 
-		text_5 = new Text(grpDeletequeue, SWT.BORDER);
-		text_5.setEditable(false);
-		text_5.setBounds(484, 30, 118, 21);
+		textDelMin = new Text(grpDeletequeue, SWT.BORDER);
+		textDelMin.setEditable(false);
+		textDelMin.setBounds(484, 30, 118, 21);
 
 		Label label_6 = new Label(grpDeletequeue, SWT.NONE);
 		label_6.setText("Kb");
@@ -228,14 +408,24 @@ public class CompositeQos extends Composite {
 		FormData fd_grpSetvlan = new FormData();
 		fd_grpSetvlan.bottom = new FormAttachment(grpDeletequeue, 104,
 				SWT.BOTTOM);
+
+		Button btnRefresh = new Button(grpDeletequeue, SWT.NONE);
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				populateQosQueues();
+			}
+		});
+		btnRefresh.setBounds(767, 24, 91, 33);
+		btnRefresh.setText("Refresh");
 		fd_grpSetvlan.top = new FormAttachment(0, 400);
 		fd_grpSetvlan.left = new FormAttachment(grpChoosedevice, 0, SWT.LEFT);
 
-		Label lblIp = new Label(grpChoosedevice, SWT.NONE);
+		lblIp = new Label(grpChoosedevice, SWT.NONE);
 		lblIp.setBounds(178, 31, 208, 15);
 		lblIp.setText("IP : ");
 
-		Label lblMac = new Label(grpChoosedevice, SWT.NONE);
+		lblMac = new Label(grpChoosedevice, SWT.NONE);
 		lblMac.setText("Mac : ");
 		lblMac.setBounds(409, 31, 248, 15);
 		fd_grpSetvlan.right = new FormAttachment(100);
@@ -246,8 +436,8 @@ public class CompositeQos extends Composite {
 		lblNewLabel.setBounds(38, 39, 55, 15);
 		lblNewLabel.setText("VlanId : ");
 
-		text_6 = new Text(grpSetvlan, SWT.BORDER);
-		text_6.setBounds(99, 36, 73, 21);
+		textVlan = new Text(grpSetvlan, SWT.BORDER);
+		textVlan.setBounds(99, 36, 73, 21);
 
 		Button btnSet = new Button(grpSetvlan, SWT.NONE);
 		btnSet.addSelectionListener(new SelectionAdapter() {
