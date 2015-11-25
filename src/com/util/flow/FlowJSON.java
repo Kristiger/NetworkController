@@ -44,7 +44,7 @@ public class FlowJSON {
 			e.printStackTrace();
 		}
 		//sometimes there is no flow syntax and may cause an Exception
-		if (obj.has("flows"))
+		if (obj != null && obj.has("flows"))
 			json = obj.getJSONArray("flows");
 		else {
 			return flows;

@@ -71,7 +71,7 @@ public class MatchManagerJSON {
 				String eth_type = obj.getString("eth_type");
 				eth_type = eth_type.replaceAll("0x", "");
 				eth_type = "0x" + eth_type;
-				if (eth_type.equals("0x0000"))
+				if (!eth_type.equals("0x0000"))
 					match.setDataLayerType(eth_type);
 			}
 			if(obj.has("eth_vlan_vid"))
@@ -105,6 +105,23 @@ public class MatchManagerJSON {
 				if (obj.getInt("tp_src") != 0)
 					match.setTransportSource(String.valueOf(obj
 							.getInt("tp_src")));
+			if(obj.has("tcp_dst"))
+				if (obj.getInt("tcp_dst") != 0)
+					match.setTcpDestination(String.valueOf(obj
+							.getInt("tcp_dst")));
+			if(obj.has("tcp_src"))
+				if (obj.getInt("tcp_src") != 0)
+					match.setTcpSource(String.valueOf(obj
+							.getInt("tcp_src")));
+			if(obj.has("udp_dst"))
+				if (obj.getInt("udp_dst") != 0)
+					match.setUdpDestination(String.valueOf(obj
+							.getInt("udp_dst")));
+			if(obj.has("udp_src"))
+				if (obj.getInt("udp_src") != 0)
+					match.setUdpSource(String.valueOf(obj
+							.getInt("udp_src")));
+			
 		}
 		return match;
 	}

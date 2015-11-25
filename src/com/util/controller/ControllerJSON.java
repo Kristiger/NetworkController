@@ -59,10 +59,12 @@ public class ControllerJSON {
 
 		if (obj == null)
 			return info;
-		if (obj.getBoolean("healthy")) {
-			info.put("health", "Yes");
-		} else {
-			info.put("health", "No");
+		if (obj.has("healthy")) {
+			if (obj.getBoolean("healthy")) {
+				info.put("health", "Yes");
+			} else {
+				info.put("health", "No");
+			}
 		}
 
 		// MEMORY

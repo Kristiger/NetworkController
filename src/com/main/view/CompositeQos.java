@@ -42,6 +42,7 @@ public class CompositeQos extends Composite {
 	private Combo comboDelete;
 	private QosQueue queue;
 	private QosPolicy qos;
+	private final int MAXQUEUE = 7;
 
 	/**
 	 * Create the composite.
@@ -109,14 +110,17 @@ public class CompositeQos extends Composite {
 
 	protected void submitRateLimit() {
 		// TODO Auto-generated method stub
+		String msg = "";
 		if (device != null) {
-			if (!textUpload.getText().equals("")&& textUpload.getText() != null) {
+			if (!textUpload.getText().equals("")
+					&& textUpload.getText() != null) {
 				try {
 					Long upload = Long.parseLong(textUpload.getText());
 					if (upload > 0)
 						XenTools.setUploadRate(device.getVifNumber(), upload,
 								100);
 					device.setUploadRate(String.valueOf(upload));
+					msg = "Upload set done.";
 				} catch (NumberFormatException e) {
 					// TODO: handle exception
 					e.printStackTrace();
@@ -131,15 +135,17 @@ public class CompositeQos extends Composite {
 						if (qosUuid != null) {
 							XenTools.setPortQos(device.getVifNumber(), qosUuid);
 							DataProvider.getQoses().put(qosUuid,
-									new QosPolicy(download, download));
+									new QosPolicy(qosUuid, download, download));
 							device.setQosUuid(qosUuid);
 						}
 					}
+					msg = msg + " Download set done.";
 				} catch (NumberFormatException e) {
 					// TODO: handle exception
 					e.printStackTrace();
 				}
 			}
+			DisplayMessage.displayStatus(MainFrame.getShell(), msg);
 		}
 	}
 
@@ -149,28 +155,37 @@ public class CompositeQos extends Composite {
 			if (!textMaxRate.getText().equals("")
 					&& !textMinRate.getText().equals("")) {
 				try {
-					Long max = Long.parseLong(textMaxRate.getText());
-					Long min = Long.parseLong(textMinRate.getText());
+					Long max = Long.parseLong(textMaxRate.getText()) * 1000;
+					Long min = Long.parseLong(textMinRate.getText()) * 1000;
 					if (max > 0 && min > 0 && min <= max) {
 						String queueUuid = XenTools
 								.createRow("queue", max, min);
 						if (queueUuid != null) {
-							QosPolicy qoses = DataProvider.getQoses().get(
+							QosPolicy qos = DataProvider.getQoses().get(
 									device.getQosUuid());
-							Map<Integer, String> queues = qoses.getQueues();
-							for (int i : queues.keySet()) {
-								if (queues.get(i).equals("")) {
-									queues.remove(i);
-									queues.put(i, queueUuid);
-									DataProvider.getQueues().put(queueUuid,
-											new QosQueue(queueUuid, max, min));
-									XenTools.addQosQueue(device.getQosUuid(),
-											i, queueUuid);
-									return;
+							if (qos != null) {
+								Map<Integer, String> queues = qos.getQueues();
+								for (int i = 0; i < MAXQUEUE; i++) {
+									if (!queues.containsKey(i)) {
+										queues.put(i, queueUuid);
+										DataProvider.getQueues().put(
+												queueUuid,
+												new QosQueue(queueUuid, max,
+														min));
+										XenTools.addQosQueue(
+												device.getQosUuid(), i,
+												queueUuid);
+										DisplayMessage.displayStatus(
+												MainFrame.getShell(),
+												"Add to qos done.Queue ID : "
+														+ i);
+										return;
+									}
 								}
+								DisplayMessage.displayError(
+										MainFrame.getShell(),
+										"Queues are full.");
 							}
-							DisplayMessage.displayError(MainFrame.getShell(),
-									"Queues are full.");
 						}
 					}
 				} catch (NumberFormatException e) {
@@ -187,8 +202,18 @@ public class CompositeQos extends Composite {
 		String[] items = comboDelete.getItems();
 		if (index > -1 && !items[index].equals("None")) {
 			int id = Integer.valueOf(items[index]);
-			DataProvider.getQueues().remove(queue.getUuid());
-			XenTools.removeQosQueue(qos.getUuid(), id);
+			// delete from data provider
+			Map<String, QosQueue> queues = DataProvider.getQueues();
+			if (queues.containsKey(queue.getUuid())) {
+				// remove from data provider.
+				queues.remove(queue.getUuid());
+				// remove from qos policy
+				Map<Integer, String> qosqueues = DataProvider.getQoses()
+						.get(device.getQosUuid()).getQueues();
+				if (qosqueues.containsKey(id))
+					qosqueues.remove(id);
+				XenTools.removeQosQueue(qos.getUuid(), id);
+			}
 		}
 	}
 
@@ -197,33 +222,37 @@ public class CompositeQos extends Composite {
 		if (device != null && device.getQosUuid() != null) {
 			// get all queues from the specific qos
 			qos = DataProvider.getQoses().get(device.getQosUuid());
-			Map<Integer, String> queues = qos.getQueues();
-			// ids used for store queue id
-			List<Integer> ids = new ArrayList<Integer>();
-			for (Integer i : queues.keySet()) {
-				if (!queues.get(i).equals("")) {
-					ids.add(i);
+			if (qos != null) {
+				Map<Integer, String> queues = qos.getQueues();
+				// ids used for store queue id
+				List<String> ids = new ArrayList<String>();
+				for (Integer i : queues.keySet()) {
+					ids.add(i + "");
 				}
-			}
-			// fill into combo box
-			if (ids.size() > 0) {
-				String[] data = ids.toArray(new String[ids.size()]);
-				comboDelete.setItems(data);
-				comboDelete.select(0);
-				populateQueue(0);
-			} else {
-				comboDelete.setItems(new String[] { "None" });
+				// fill into combo box
+				if (ids.size() > 0) {
+					String[] data = ids.toArray(new String[ids.size()]);
+					comboDelete.setItems(data);
+					comboDelete.select(0);
+				} else {
+					comboDelete.setItems(new String[] { "None" });
+				}
 			}
 		}
 	}
 
-	private void populateQueue(int i) {
+	private void populateQueue(int index) {
 		// TODO Auto-generated method stub
 		if (device != null) {
-			String queueUuid = qos.getQueues().get(i);
+			qos = DataProvider.getQoses().get(device.getQosUuid());
+			// get the queue id
+			int id = Integer.valueOf(comboDelete.getItem(index));
+			String queueUuid = qos.getQueues().get(id);
 			queue = DataProvider.getQueues().get(queueUuid);
-			textDelMax.setText(String.valueOf(queue.getMaxRate()));
-			textDelMin.setText(String.valueOf(queue.getMinRate()));
+			if (queue != null) {
+				textDelMax.setText(String.valueOf(queue.getMaxRate() / 1000));
+				textDelMin.setText(String.valueOf(queue.getMinRate() / 1000));
+			}
 		}
 	}
 
@@ -367,6 +396,15 @@ public class CompositeQos extends Composite {
 		grpDeletequeue.setLayoutData(fd_grpDeletequeue);
 
 		comboDelete = new Combo(grpDeletequeue, SWT.READ_ONLY);
+		comboDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int index = comboDelete.getSelectionIndex();
+				if (index > -1 && !comboDelete.getItems()[index].equals("None")) {
+					populateQueue(index);
+				}
+			}
+		});
 		comboDelete.setBounds(38, 27, 103, 23);
 
 		Label label_2 = new Label(grpDeletequeue, SWT.NONE);

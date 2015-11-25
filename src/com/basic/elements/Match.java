@@ -188,6 +188,9 @@ public class Match {
 					+ this.dataLayerDestination + "\"");
 		}
 		if (this.dataLayerType != null) {
+			if(dataLayerType.length() == 5){
+				dataLayerType = dataLayerType.replace("0x", "0x0");
+			}
 			serial = serial.concat(",\"eth_type\":\"" + this.dataLayerType
 					+ "\"");
 		}
