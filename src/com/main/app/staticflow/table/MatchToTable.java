@@ -29,12 +29,7 @@ public class MatchToTable {
 				{ "Network Type Of Service", m.getNetworkTypeOfService() },
 				{ "Transport Destination", m.getTransportDestination() },
 				{ "Transport Source", m.getTransportSource() },
-				{ "Tcp Destination", m.getTcpDestination() },
-				{ "Tcp Source" ,m.getTcpSource() },
-				{ "Udp Destination", m.getUdpDestination() },
-				{ "Udp Source", m.getUdpSource() },
-				//{ "Wildcards", m.getWildcards() } 
-				};
+				{ "Wildcards", m.getWildcards() } };
 		return match;
 	}
 
@@ -46,9 +41,8 @@ public class MatchToTable {
 				{ "Input Port", "" }, { "Network Destination", "" },
 				{ "Network Protocol", "" }, { "Network Source", "" },
 				{ "Network Type Of Service", "" },
-				{ "Transport Destination", "" }, { "Transport Source", "" }
-				//,{ "Wildcards", "" } 
-				};
+				{ "Transport Destination", "" }, { "Transport Source", "" },
+				{ "Wildcards", "" } };
 		return match;
 	}
 

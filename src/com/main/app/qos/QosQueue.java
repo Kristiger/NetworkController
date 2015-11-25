@@ -9,12 +9,12 @@ public class QosQueue {
 	public QosQueue(){
 	}
 	
-	public QosQueue(long maxRate, long minRate){
+	public QosQueue(long minRate, long maxRate){
 		this.minRate = minRate;
 		this.maxRate = maxRate;
 	}
 	
-	public QosQueue(String uuid, long maxRate, long minRate){
+	public QosQueue(String uuid, long minRate, long maxRate){
 		this(minRate,maxRate);
 		this.uuid = uuid;
 	}

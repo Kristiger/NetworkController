@@ -166,11 +166,6 @@ public class Flow implements Comparable<Flow> {
 				serial = serial.concat(", ");
 			serial = serial.concat("\"priority\":\"" + priority + "\"");
 		}
-		
-		if (match != null) {
-			serial = serial.concat(match.serialize());
-		}
-		
 		if (!actions.isEmpty()) {
 			if (serial.length() > 15)
 				serial = serial.concat(", ");
@@ -182,6 +177,9 @@ public class Flow implements Comparable<Flow> {
 				serial = serial.concat(act.serialize());
 			}
 			serial = serial.concat("\"");
+		}
+		if (match != null) {
+			serial = serial.concat(match.serialize());
 		}
 
 		serial = serial.concat("}");

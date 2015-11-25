@@ -46,9 +46,7 @@ public class StaticFlowManagerJSON {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		if(jsonobj == null){
-			return flows;
-		}
+
 		if (jsonobj.length() != 0) {
 			json = jsonobj.getJSONArray(sw);
 
@@ -77,6 +75,9 @@ public class StaticFlowManagerJSON {
 								flow.setPriority(String.valueOf(obj
 										.getInt("priority")));
 								flows.put(flow.getName(),flow);
+
+								// debug
+								System.out.println(flow.serialize());
 							}
 						}
 					} catch (Exception e) {

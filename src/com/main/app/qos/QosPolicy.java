@@ -16,6 +16,9 @@ public class QosPolicy {
 
 	public QosPolicy() {
 		queues = new ConcurrentHashMap<Integer, String>();
+		for (int i = 0; i < 7; i++) {
+			queues.put(i, "");
+		}
 	}
 
 	public QosPolicy(String uuid) {
@@ -23,9 +26,8 @@ public class QosPolicy {
 		this.uuid = uuid;
 	}
 
-	public QosPolicy(String qosUuid, long maxRate, long minRate) {
-		// TODO Auto-generated constructor stub
-		this(qosUuid);
+	public QosPolicy(long maxRate, long minRate) {
+		this();
 		this.maxRate = maxRate;
 		this.minRate = minRate;
 	}

@@ -9,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
-import java.util.Map;
 
 import com.basic.elements.Flow;
 import com.main.provider.DataProvider;
@@ -35,7 +34,7 @@ public class FlowManagerPusher {
 		URLConnection conn = url.openConnection();
 		conn.setDoOutput(true);
 		OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-		System.out.println("send : " + flow.serialize());
+		System.out.println(flow.serialize());
 		wr.write(flow.serialize());
 		wr.flush();
 
@@ -57,15 +56,14 @@ public class FlowManagerPusher {
 				|| json.getString("status").equals(warning)) {
 			// Get actual flows, we pass null as first parameter
 			// to denote that we are not supplying a JSON object
-			/*List<Flow> actualFlows = DataProvider.getRealFlows(
-					flow.getSwitch());*/
-			Map<String, Flow> actualFlows = DataProvider.getStaticFlows(flow.getSwitch(), true);
+			List<Flow> actualFlows = DataProvider.getRealFlows(
+					flow.getSwitch());
 			// Compare the flow you just pushed with those actually on the
 			// switch
 			// If found, success message printed.
-			System.out.println("Push : " + flow.serialize());
-			for (Flow actualFlow : actualFlows.values()) {
-				System.out.println("recv : " + actualFlow.serialize());
+			for (Flow actualFlow : actualFlows) {
+				System.out.println("actual" + actualFlow.serialize());
+				System.out.println("flow" + flow.serialize());
 				if (flow.equals(actualFlow)) {
 					return "Flow successfully pushed down to switches";
 				}
