@@ -123,7 +123,7 @@ public class CompositeStaticFlow extends Composite {
 
 			if (DataProvider.getStaticFlows(currentSwtichDpid, true).size() > 0) {
 				for (Flow flow : DataProvider.getStaticFlows(currentSwtichDpid,
-						false).values()) {
+						true).values()) {
 					if (flow.getName() != null) {
 						new TreeItem(treeFlows, SWT.NONE).setText(flow
 								.getName());
@@ -139,7 +139,6 @@ public class CompositeStaticFlow extends Composite {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	private void populateFlowView(String flowname) {
@@ -178,10 +177,12 @@ public class CompositeStaticFlow extends Composite {
 	}
 
 	private void populateActionTable(int index) {
-		currentAction = flow.getActions().get(index);
-		tableAction.removeAll();
-		for (String[] s : ActionToTable.getActionTableFormat(currentAction)) {
-			new TableItem(tableAction, SWT.NO_FOCUS).setText(s);
+		if (flow != null && flow.getActions().size() > 0) {
+			currentAction = flow.getActions().get(index);
+			tableAction.removeAll();
+			for (String[] s : ActionToTable.getActionTableFormat(currentAction)) {
+				new TableItem(tableAction, SWT.NO_FOCUS).setText(s);
+			}
 		}
 	}
 
@@ -266,7 +267,7 @@ public class CompositeStaticFlow extends Composite {
 		treeFlows.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				TreeItem[] items = treeFlows.getItems();
+				TreeItem[] items = treeFlows.getSelection();
 				if (items.length > 0 && !items[0].getText().equals("None")) {
 					populateFlowView(items[0].getText());
 				}
@@ -322,7 +323,50 @@ public class CompositeStaticFlow extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (flow != null && flow.getActions().size() > 0) {
+					if (flow != null) {
+						if (flow.getName() != null
+								|| !textFlowName.getText().equals("")) {
 
+							if (FlowManagerPusher
+									.errorChecksPassed(textPriority.getText())) {
+								// Parse the changes made to the flow
+								flow.setName(textFlowName.getText());
+								flow.setPriority(textPriority.getText());
+
+								// Push the flow and get the response
+								String response;
+								try {
+									response = FlowManagerPusher.push(flow);
+									if (response
+											.equals("Flow successfully pushed down to switches")) {
+										if (currentSwtich != null) {
+											populateFlowTree(treeSwitch
+													.getSelection()[0]);
+										} else {
+											populateSwitchTree();
+										}
+
+										disposeEditors("all");
+										unsavedProgress = false;
+									}
+									DisplayMessage.displayStatus(
+											MainFrame.getShell(), response);
+								} catch (IOException | JSONException e1) {
+									DisplayMessage.displayError(
+											MainFrame.getShell(),
+											"Problem occured while pushing flow, please view the log for details");
+									e1.printStackTrace();
+								}
+							}
+
+						} else {
+							DisplayMessage.displayError(MainFrame.getShell(),
+									"Your flow must have a name");
+						}
+					} else {
+						DisplayMessage.displayError(MainFrame.getShell(),
+								"You do not have a flow to push!");
+					}
 				}
 			}
 		});
@@ -333,7 +377,7 @@ public class CompositeStaticFlow extends Composite {
 		btnClear.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
+				setupNewFlow();
 			}
 		});
 		btnClear.setLayoutData(new RowData(100, 40));
@@ -432,7 +476,7 @@ public class CompositeStaticFlow extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				disposeEditors("action");
 				// Populate the action table, if we actually have actions.
-				if (!treeAction.getSelection()[0].getText(0).equals("None Set"))
+				if (!treeAction.getSelection()[0].getText(0).equals("None"))
 					populateActionTable(treeAction.indexOf(treeAction
 							.getSelection()[0]));
 			}

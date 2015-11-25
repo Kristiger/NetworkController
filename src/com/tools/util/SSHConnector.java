@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,8 +67,10 @@ public class SSHConnector {
 			/* Show exit status, if available (otherwise "null") */
 			// System.out.println("ExitCode: " + sess.getExitStatus());
 
-		} catch (IOException e) {
+		} catch (ConnectException e) {
+			// TODO: handle exception
 			e.printStackTrace(System.err);
+		} catch (IOException e) {
 			/* Close this session */
 			try {
 				if (stdout != null)
