@@ -18,11 +18,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.basic.elements.Device;
+import com.basic.elements.UPDATE;
 import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
 import com.main.provider.DataProvider;
 import com.main.view.util.DisplayMessage;
 import com.tools.util.JSONException;
+import com.util.db.DBHelper;
 import com.util.xen.XenTools;
 
 public class CompositeQos extends Composite {
@@ -43,6 +45,7 @@ public class CompositeQos extends Composite {
 	private QosQueue queue;
 	private QosPolicy qos;
 	private final int MAXQUEUE = 7;
+	private DBHelper db;
 
 	/**
 	 * Create the composite.
@@ -134,9 +137,10 @@ public class CompositeQos extends Composite {
 								download);
 						if (qosUuid != null) {
 							XenTools.setPortQos(device.getVifNumber(), qosUuid);
-							DataProvider.getQoses().put(qosUuid,
-									new QosPolicy(qosUuid, download, download));
+							qos = new QosPolicy(qosUuid, download, download);
+							DataProvider.getQoses().put(qosUuid, qos);
 							device.setQosUuid(qosUuid);
+							DataProvider.updateQosStore(device.getVmUuid(), qos, UPDATE.INSERT);
 						}
 					}
 					msg = msg + " Download set done.";
@@ -168,13 +172,16 @@ public class CompositeQos extends Composite {
 								for (int i = 0; i < MAXQUEUE; i++) {
 									if (!queues.containsKey(i)) {
 										queues.put(i, queueUuid);
-										DataProvider.getQueues().put(
-												queueUuid,
-												new QosQueue(queueUuid, max,
-														min));
+										QosQueue queue = new QosQueue(
+												queueUuid, max, min);
+										DataProvider.getQueues().put(queueUuid,
+												queue);
 										XenTools.addQosQueue(
 												device.getQosUuid(), i,
 												queueUuid);
+										DataProvider.updateQueueStore(
+												qos.getUuid(), queue, i,
+												UPDATE.INSERT);
 										DisplayMessage.displayStatus(
 												MainFrame.getShell(),
 												"Add to qos done.Queue ID : "
@@ -198,21 +205,34 @@ public class CompositeQos extends Composite {
 
 	protected void deleteQueueFromQos() {
 		// TODO Auto-generated method stub
+
+		// get select index
 		int index = comboDelete.getSelectionIndex();
 		String[] items = comboDelete.getItems();
+
 		if (index > -1 && !items[index].equals("None")) {
+			// get queue id
 			int id = Integer.valueOf(items[index]);
-			// delete from data provider
+			// get all queues
 			Map<String, QosQueue> queues = DataProvider.getQueues();
+			// if queue exists
 			if (queues.containsKey(queue.getUuid())) {
+
 				// remove from data provider.
 				queues.remove(queue.getUuid());
+
 				// remove from qos policy
 				Map<Integer, String> qosqueues = DataProvider.getQoses()
 						.get(device.getQosUuid()).getQueues();
 				if (qosqueues.containsKey(id))
 					qosqueues.remove(id);
+
+				// remove from xen sw
 				XenTools.removeQosQueue(qos.getUuid(), id);
+
+				// remove from database
+				DataProvider.updateQueueStore(device.getQosUuid(), queue, id,
+						UPDATE.DELETE);
 			}
 		}
 	}

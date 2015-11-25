@@ -25,7 +25,7 @@ public class DeviceUtil {
 					Iterator<Port> it = ports.iterator();
 					while (it.hasNext()) {
 						Port port = it.next();
-						if (port.getPortNumber().equals(device.getSwtichPort())) {
+						if (port.getPortNumber().equals(device.getSwitchPort())) {
 							device.setVifNumber(port.getName());
 							break;
 						}

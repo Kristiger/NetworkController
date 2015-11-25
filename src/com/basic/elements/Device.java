@@ -3,103 +3,91 @@ package com.basic.elements;
 import java.util.Date;
 
 public class Device {
-	private boolean isActive = false;
+	
+	private String vmUuid;
+	private String vifUuid;
+	private String vifNumber;
+	private String ipAddr;
+	private String macAddr;
+	private String switchPort;
+	private String switchDpid;
+	private String qosUuid;
+	private String uploadRate;
 	
 	private Date lastSeen;
-	private String uploadRate;
-	private String vifNumber, ipAddr, macAddr, swtichPort, switchDpid, qosUuid,
-			vmUuid, vifUuid;
-
+	private boolean isActive;
+	
+	public Device(){
+	}
+	
 	public Device(String mac) {
 		// TODO Auto-generated constructor stub
-		this.setMacAddr(mac);
+		this.macAddr = mac;
 	}
-
-	public String getIpAddr() {
-		return ipAddr;
-	}
-
-	public Date getLastSeen() {
-		return lastSeen;
-	}
-
-	public String getMacAddr() {
-		return macAddr;
-	}
-
-	public String getQosUuid() {
-		return qosUuid;
-	}
-
-	public String getSwitchDpid() {
-		return switchDpid;
-	}
-
-	public String getSwtichPort() {
-		return swtichPort;
-	}
-
-	public String getUploadRate() {
-		return uploadRate;
-	}
-
-	public String getVifNumber() {
-		return vifNumber;
-	}
-
-	public String getVifUuid() {
-		return vifUuid;
-	}
-
-	public String getVmUuid() {
-		return vmUuid;
-	}
-
 	public boolean isActive() {
 		return isActive;
 	}
-
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-
-	public void setIpAddr(String ipAddr) {
-		this.ipAddr = ipAddr;
+	public String getVmUuid() {
+		return vmUuid;
 	}
-
-	public void setLastSeen(Date lastSeen) {
-		this.lastSeen = lastSeen;
+	public void setVmUuid(String vmuuid) {
+		this.vmUuid = vmuuid;
 	}
-
-	public void setMacAddr(String macAddr) {
-		this.macAddr = macAddr;
+	public String getVifUuid() {
+		return vifUuid;
 	}
-
-	public void setQosUuid(String qosUuid) {
-		this.qosUuid = qosUuid;
-	}
-
-	public void setSwitchDpid(String switchDpid) {
-		this.switchDpid = switchDpid;
-	}
-
-	public void setSwtichPort(String swtichPort) {
-		this.swtichPort = swtichPort;
-	}
-
-	public void setUploadRate(String uploadRate) {
-		this.uploadRate = uploadRate;
-	}
-
-	public void setVifNumber(String vifNumber) {
-		this.vifNumber = vifNumber;
-	}
-
 	public void setVifUuid(String vifUuid) {
 		this.vifUuid = vifUuid;
 	}
-
-	public void setVmUuid(String vmUuid) {
-		this.vmUuid = vmUuid;
+	public String getVifNumber() {
+		return vifNumber;
 	}
+	public void setVifNumber(String VifNumber) {
+		this.vifNumber = VifNumber;
+	}
+	public String getSwitchDpid() {
+		return switchDpid;
+	}
+	public void setSwitchDpid(String Switch) {
+		this.switchDpid = Switch;
+	}
+	public String getSwitchPort() {
+		return switchPort;
+	}
+	public void setSwitchPort(String SwitchPort) {
+		this.switchPort = SwitchPort;
+	}
+	public String getIpAddr() {
+		return ipAddr;
+	}
+	public void setIpAddr(String IpAddr) {
+		this.ipAddr = IpAddr;
+	}
+	public String getMacAddr() {
+		return macAddr;
+	}
+	public void setMacAddr(String MacAddr) {
+		this.macAddr = MacAddr;
+	}
+	public Date getLastSeen() {
+		return lastSeen;
+	}
+	public void setLastSeen(Date lastSeen) {
+		this.lastSeen = lastSeen;
+	}
+	public String getQosUuid() {
+		return qosUuid;
+	}
+	public void setQosUuid(String qosUuid) {
+		this.qosUuid = qosUuid;
+	}
+	public String getUploadRate() {
+		return uploadRate;
+	}
+	public void setUploadRate(String uploadRate) {
+		this.uploadRate = uploadRate;
+	}	
 }

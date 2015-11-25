@@ -135,9 +135,9 @@ public class CompositeDevices extends Composite {
 			lblVifPort_1.setText(currentDevice.getVifNumber());
 		else
 			lblVifPort_1.setText("None");
-
-		if (currentDevice.getSwtichPort() != null)
-			lblSwitchport_1.setText(currentDevice.getSwtichPort());
+		
+		if (currentDevice.getSwitchPort() != null)
+			lblSwitchport_1.setText(currentDevice.getSwitchPort());
 		else
 			lblSwitchport_1.setText("None");
 

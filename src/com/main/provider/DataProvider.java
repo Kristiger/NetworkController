@@ -9,6 +9,8 @@ import com.basic.elements.Device;
 import com.basic.elements.Flow;
 import com.basic.elements.Port;
 import com.basic.elements.Switch;
+import com.basic.elements.UPDATE;
+import com.basic.elements.Device;
 import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
 import com.main.app.qos.QosUtil;
@@ -19,9 +21,9 @@ import com.tools.table.FlowToTable;
 import com.tools.table.PortToTable;
 import com.tools.util.JSONException;
 import com.util.controller.ControllerJSON;
+import com.util.db.DBHelper;
 import com.util.device.DeviceUtil;
 import com.util.flow.FlowJSON;
-import com.util.sw.SwitchJSON;
 import com.util.sw.SwitchesJSON;
 
 public class DataProvider {
@@ -34,20 +36,10 @@ public class DataProvider {
 	private static Map<String, Switch> switches = null;
 	private static Map<String, Flow> staticFlows = null;
 
-	public static String getIP() {
-		return IP;
-	}
+	private static DBHelper db = null;
 
-	public static void setIP(String iP) {
-		IP = iP;
-	}
-
-	public static String getPORT() {
-		return PORT;
-	}
-
-	public static void setPORT(String pORT) {
-		PORT = pORT;
+	public static Map<String, String> getControllerInfo() throws JSONException {
+		return ControllerJSON.getControllerInfo();
 	}
 
 	public static Map<String, Device> getDevices(boolean update)
@@ -56,6 +48,35 @@ public class DataProvider {
 			devices = DeviceUtil.getDevices(true);
 		}
 		return devices;
+	}
+
+	public static String[][] getDeviceTableFormat(Map<String, Device> devices) {
+		// TODO Auto-generated method stub
+		return DeviceToTable.deviceSummariesToTable(devices);
+	}
+
+	public static List<Flow> getFlows(String dpid) throws IOException,
+			JSONException {
+		// TODO Auto-generated method stub
+		return FlowJSON.getFlows(dpid);
+	}
+
+	public static String[][] getFlowTableFormat(List<Flow> flows) {
+		// TODO Auto-generated method stub
+		return FlowToTable.getFlowTableFormat(flows);
+	}
+
+	public static String getIP() {
+		return IP;
+	}
+
+	public static String getPORT() {
+		return PORT;
+	}
+
+	public static String[][] getPortTableFormat(List<Port> ports) {
+		// TODO Auto-generated method stub
+		return PortToTable.getPortTableFormat(ports);
 	}
 
 	public static Map<String, QosPolicy> getQoses() {
@@ -72,12 +93,22 @@ public class DataProvider {
 		return queues;
 	}
 
-	public static Map<String, Switch> getSwitches(boolean update)
-			throws JSONException {
-		if (switches == null || update) {
-			switches = SwitchesJSON.getSwitches();
+	public static List<Flow> getRealFlows(String sw) throws IOException,
+			JSONException {
+		// TODO Auto-generated method stub
+		if (switches != null) {
+			return FlowJSON.getFlows(sw);
 		}
-		return switches;
+		return new ArrayList<Flow>();
+	}
+
+	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid,
+			boolean b) throws IOException, JSONException {
+		// TODO Auto-generated method stub
+		if (b || staticFlows == null) {
+			return StaticFlowManagerJSON.getFlows(currentSwtichDpid);
+		}
+		return staticFlows;
 	}
 
 	public static Switch getSwitch(String dpid) throws JSONException {
@@ -88,51 +119,64 @@ public class DataProvider {
 		return null;
 	}
 
+	public static Map<String, Switch> getSwitches(boolean update)
+			throws JSONException {
+		if (switches == null || update) {
+			switches = SwitchesJSON.getSwitches();
+		}
+		return switches;
+	}
+
+	public static void setIP(String iP) {
+		IP = iP;
+	}
+
+	public static void setPORT(String pORT) {
+		PORT = pORT;
+	}
+
+	public static void updateQosStore(String vmUuid, QosPolicy qos, UPDATE type) {
+		// TODO Auto-generated method stub
+		db = new DBHelper();
+		if (type == UPDATE.INSERT) {
+			db.insertQos(qos);
+		} else if (type == UPDATE.DELETE) {
+			db.removeQos(qos.getUuid());
+		} else if (type == UPDATE.BAND) {
+			db.insertQosForVm(vmUuid, qos.getUuid());
+		} else if (type == UPDATE.UNBAND) {
+			db.removeQosToVm(vmUuid, qos.getUuid());
+		}
+		db.closeDBConnection();
+	}
+
+	public static void updateQueueStore(String qosUuid, QosQueue queue, int i,
+			UPDATE type) {
+		// TODO Auto-generated method stub
+		db = new DBHelper();
+		if (type == UPDATE.INSERT) {
+			db.insertQueue(queue);
+			db.insertQueueForQos(qosUuid, queue.getUuid(), i);
+		} else if (type == UPDATE.DELETE) {
+			db.removeQueue(queue.getUuid());
+			db.removeQueueToQos(qosUuid, queue.getUuid());
+		}
+		db.closeDBConnection();
+	}
+
 	public static void updateSwitch(Switch sw) throws JSONException {
 		// TODO Auto-generated method stub
 		SwitchesJSON.updateSwitch(sw);
 	}
 
-	public static String[][] getPortTableFormat(List<Port> ports) {
+	public static void updateVmStore(Device vm, UPDATE type) {
 		// TODO Auto-generated method stub
-		return PortToTable.getPortTableFormat(ports);
-	}
-
-	public static String[][] getFlowTableFormat(List<Flow> flows) {
-		// TODO Auto-generated method stub
-		return FlowToTable.getFlowTableFormat(flows);
-	}
-
-	public static List<Flow> getFlows(String dpid) throws IOException,
-			JSONException {
-		// TODO Auto-generated method stub
-		return FlowJSON.getFlows(dpid);
-	}
-
-	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid,
-			boolean b) throws IOException, JSONException {
-		// TODO Auto-generated method stub
-		if(b || staticFlows == null){
-			return StaticFlowManagerJSON.getFlows(currentSwtichDpid);
+		db = new DBHelper();
+		if (type == UPDATE.INSERT) {
+			db.insertDevice(vm);
+		} else if (type == UPDATE.DELETE) {
+			db.removeVm(vm.getVmUuid());
 		}
-		return staticFlows;
-	}
-
-	public static Map<String, String> getControllerInfo() throws JSONException {
-		return ControllerJSON.getControllerInfo();
-	}
-
-	public static String[][] getDeviceTableFormat(Map<String, Device> devices) {
-		// TODO Auto-generated method stub
-		return DeviceToTable.deviceSummariesToTable(devices);
-	}
-
-	public static List<Flow> getRealFlows(String sw) throws IOException,
-			JSONException {
-		// TODO Auto-generated method stub
-		if (switches != null) {
-			return FlowJSON.getFlows(sw);
-		}
-		return new ArrayList<Flow>();
+		db.closeDBConnection();
 	}
 }

@@ -32,8 +32,8 @@ public class DeviceToTable {
 				stringList.add("None");
 			}
 
-			if (dev.getSwtichPort() != null) {
-				stringList.add(dev.getSwtichPort());
+			if (dev.getSwitchPort() != null) {
+				stringList.add(dev.getSwitchPort());
 			} else {
 				stringList.add("None");
 			}

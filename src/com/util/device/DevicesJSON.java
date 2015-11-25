@@ -72,7 +72,7 @@ public class DevicesJSON {
 
 				temp.setSwitchDpid(obj.getJSONArray("attachmentPoint")
 						.getJSONObject(0).getString("switchDPID"));
-				temp.setSwtichPort(String.valueOf(obj
+				temp.setSwitchPort(String.valueOf(obj
 						.getJSONArray("attachmentPoint").getJSONObject(0)
 						.getInt("port")));
 				if (obj.has("lastSeen")) {
