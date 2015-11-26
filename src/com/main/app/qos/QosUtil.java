@@ -1,71 +1,179 @@
 package com.main.app.qos;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.util.db.DBHelper;
 
 public class QosUtil {
-	private static Map<String, QosPolicy> qoses = new ConcurrentHashMap<String, QosPolicy>();
-	private static DBHelper db;
-
 	enum UPDATE {
 		ADD, REMOVE
 	}
 
-	public QosUtil() {
-		updateFromDB();
+	private static Map<String, QosPolicy> qoses = new ConcurrentHashMap<String, QosPolicy>();
+
+	private static DBHelper db;
+
+	public static void addQos(QosPolicy qos) {
+		if (!qoses.containsKey(qos.getUuid())) {
+			qoses.put(qos.getUuid(), qos);
+			
+			db = new DBHelper();
+			String sql = "INSERT INTO `mydatabase`.`qos` (`id`, `qosUuid`, `minRate`, `maxRate`) "
+					+ "VALUES (NULL, \'"
+					+ qos.getUuid()
+					+ "\', \'"
+					+ qos.getMinRate() + "\', \'" + qos.getMaxRate() + "\');";
+			try {
+				if (db.executeUpdate(sql) == 0) {
+					throw new Exception("Insert qos, 0 returned");
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				db.close();
+			}
+		}
 	}
 
-	private void updateFromDB() {
+	public static void addQueueForQos(String qosUuid, String queueUuid,
+			int queueId) {
 		// TODO Auto-generated method stub
-		db = new DBHelper();
-		qoses = db.getQos();
+		if (qoses.containsKey(qosUuid)) {
+			qoses.get(qosUuid).getQueues().put(queueId, queueUuid);
+
+			db = new DBHelper();
+			String sql = "SELECT * FROM `qostoqueue` WHERE `qosUuid`=\'"
+					+ qosUuid + "\' AND `queueId`=" + queueId;
+			ResultSet result;
+			try {
+				// see if there is a queue to qos exist, if yes, remove it.
+				result = db.executeQuery(sql);
+				if (result.getRow() != 0) {
+					removeQueueForQos(result.getString("qosUuid"),
+							result.getString("queueUuid"),
+							result.getInt("queueId"));
+				}
+				sql = "INSERT INTO `mydatabase`.`qostoqueue` "
+						+ "(`id`, `qosUuid`, `queueUuid`, `queueId`) VALUES (NULL, \'"
+						+ qosUuid + "\', \'" + queueUuid + "\', \'" + queueId
+						+ "\');";
+				db.executeUpdate(sql);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				db.close();
+			}
+		}
+	}
+
+	public static QosPolicy getQos(String qosUuid) {
+		return qoses.get(qosUuid);
 	}
 
 	public static Map<String, QosPolicy> getQoses() {
 		return qoses;
 	}
 
-	public static void addQos(QosPolicy qos) {
-		qoses.put(qos.getUuid(), qos);
-		updataDB(qos, UPDATE.ADD);
-	}
-
-	public static QosPolicy getQos(String qosUuid) {
-		if (qoses.containsKey(qosUuid)) {
-			return qoses.get(qosUuid);
+	public static Map<String, QosPolicy> getQosFromDB() {
+		// TODO Auto-generated method stub
+		db = new DBHelper();
+		String sql = "SELECT * FROM `qos` LIMIT 0, 30 ";
+		QosPolicy qos = null;
+		try {
+			ResultSet result = db.executeQuery(sql);
+			while (result.next()) {
+				qos = new QosPolicy();
+				qos.setUuid(result.getString("qosUuid"));
+				qos.setMaxRate(result.getLong("maxRate"));
+				qos.setMinRate(result.getLong("minRate"));
+				qoses.put(qos.getUuid(), qos);
+			}
+			result.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			db.close();
 		}
-		return null;
+		return qoses;
 	}
 
-	public static boolean removeQos(String qosUuid) {
+	public static Map<Integer, String> getQueuesForQos(String qosUuid) {
+
+		db = new DBHelper();
+		String sql = "SELECT * FROM `qostoqueue` WHERE `qosUuid` = \'"
+				+ qosUuid + "\'";
+		Map<Integer, String> queues = new ConcurrentHashMap<Integer, String>();
+		try {
+			ResultSet result = db.executeQuery(sql);
+			while (result.next()) {
+				String queueUuid = result.getString("queueUuid");
+				int id = result.getInt("queueId");
+				queues.put(id, queueUuid);
+			}
+			result.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			db.close();
+		}
+		return queues;
+	}
+
+	public static void removeQos(String qosUuid) {
+
 		if (qoses.containsKey(qosUuid)) {
-			QosPolicy qos = qoses.get(qosUuid);
 			qoses.remove(qosUuid);
-			updataDB(qos, UPDATE.REMOVE);
-			return true;
-		}
-		return false;
-	}
 
-	public static boolean addQosQueue(String qosUuid, String queueUuid) {
-		if (qoses.containsKey(qosUuid)) {
-			QosPolicy qos = qoses.get(qosUuid);
-			if (qos.addQueue(queueUuid) != -1) {
-				return true;
+			db = new DBHelper();
+			String sql = "DELETE FROM `qos` WHERE `qosUuid`=\'" + qosUuid
+					+ "\'";
+			try {
+				if (db.executeUpdate(sql) == 0) {
+					throw new Exception("Remove qos, 0 returned");
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				db.close();
 			}
 		}
-		return false;
 	}
 
-	private static void updataDB(QosPolicy qos, UPDATE type) {
-		db = new DBHelper();
-		if (type == UPDATE.ADD) {
-			db.insertQos(qos);
-		} else if (type == UPDATE.REMOVE) {
-			db.removeQos(qos.getUuid());
+	public static void removeQueueForQos(String qosUuid, String queueUuid,
+			int queueId) {
+		// TODO Auto-generated method stub
+		if (qoses.containsKey(qosUuid)) {
+			qoses.get(qosUuid).getQueues().remove(queueId);
+
+			DBHelper db1 = new DBHelper();
+			String sql = "DELETE FROM `qostoqueue` WHERE `qosUuid`=\'"
+					+ qosUuid + "\' AND `queueUuid`=\'" + queueUuid + "\'";
+			try {
+				if (db1.executeUpdate(sql) == 0) {
+					throw new Exception("Remove queue for qos, 0 returned");
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				db1.close();
+			}
 		}
-		db.closeDBConnection();
 	}
 }

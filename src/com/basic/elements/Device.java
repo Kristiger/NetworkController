@@ -12,7 +12,7 @@ public class Device {
 	private String switchPort;
 	private String switchDpid;
 	private String qosUuid;
-	private String uploadRate;
+	private long uploadRate = -1;
 	
 	private Date lastSeen;
 	private boolean isActive = false;
@@ -84,10 +84,20 @@ public class Device {
 	public void setQosUuid(String qosUuid) {
 		this.qosUuid = qosUuid;
 	}
-	public String getUploadRate() {
+	public long getUploadRate() {
 		return uploadRate;
 	}
-	public void setUploadRate(String uploadRate) {
+	public void setUploadRate(long uploadRate) {
 		this.uploadRate = uploadRate;
+	}
+
+	@Override
+	public String toString() {
+		return "Device [vmUuid=" + vmUuid + ", vifUuid=" + vifUuid
+				+ ", vifNumber=" + vifNumber + ", ipAddr=" + ipAddr
+				+ ", macAddr=" + macAddr + ", switchPort=" + switchPort
+				+ ", switchDpid=" + switchDpid + ", qosUuid=" + qosUuid
+				+ ", uploadRate=" + uploadRate + ", lastSeen=" + lastSeen
+				+ ", isActive=" + isActive + "]";
 	}	
 }

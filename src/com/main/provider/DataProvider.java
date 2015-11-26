@@ -29,13 +29,11 @@ public class DataProvider {
 	private static String IP;
 	private static String PORT;
 
-	private static Map<String, Device> devices = null;
 	private static Map<String, QosPolicy> qoses = null;
 	private static Map<String, QosQueue> queues = null;
+	private static Map<String, Device> devices = null;
 	private static Map<String, Switch> switches = null;
 	private static Map<String, Flow> staticFlows = null;
-
-	private static DBHelper db = null;
 
 	public static Map<String, String> getControllerInfo() throws JSONException {
 		return ControllerJSON.getControllerInfo();
@@ -43,8 +41,11 @@ public class DataProvider {
 
 	public static Map<String, Device> getDevices(boolean update)
 			throws JSONException {
-		if (devices == null || update) {
-			devices = DeviceUtil.getDevices(true);
+		if (devices == null) {
+			devices = DeviceUtil.getDevicesFromDB();
+		}
+		if (update) {
+			devices = DeviceUtil.getDevices();
 		}
 		return devices;
 	}
@@ -80,14 +81,14 @@ public class DataProvider {
 
 	public static Map<String, QosPolicy> getQoses() {
 		if (qoses == null) {
-			qoses = QosUtil.getQoses();
+			qoses = QosUtil.getQosFromDB();
 		}
 		return qoses;
 	}
 
 	public static Map<String, QosQueue> getQueues() {
 		if (queues == null) {
-			queues = QueueUtil.getQueues();
+			queues = QueueUtil.getQueuesFromDB();
 		}
 		return queues;
 	}
@@ -102,9 +103,9 @@ public class DataProvider {
 	}
 
 	public static Map<String, Flow> getStaticFlows(String currentSwtichDpid,
-			boolean b) throws IOException, JSONException {
+			boolean update) throws IOException, JSONException {
 		// TODO Auto-generated method stub
-		if (b || staticFlows == null) {
+		if (update || staticFlows == null) {
 			return StaticFlowManagerJSON.getFlows(currentSwtichDpid);
 		}
 		return staticFlows;
@@ -112,10 +113,10 @@ public class DataProvider {
 
 	public static Switch getSwitch(String dpid) throws JSONException {
 		// TODO Auto-generated method stub
-		if (switches != null) {
-			return switches.get(dpid);
+		if(switches == null){
+			getSwitches(true);
 		}
-		return null;
+		return switches.get(dpid);
 	}
 
 	public static Map<String, Switch> getSwitches(boolean update)
@@ -134,61 +135,56 @@ public class DataProvider {
 		PORT = pORT;
 	}
 
+	public static void updateDeviceStore(Device device, UPDATETYPE type,
+			String key, Object value) {
+		// TODO Auto-generated method stub
+		switch (type) {
+		case INSERT:
+			DeviceUtil.addDevice(device);
+			break;
+		case DELETE:
+			DeviceUtil.removeDevice(device.getVmUuid());
+			break;
+		case UPDATE:
+			DeviceUtil.updateDevice(device.getVmUuid(), key, value);
+			break;
+		case BAND:
+			DeviceUtil.addQosForDevice(device.getVmUuid(), device.getQosUuid());
+		default:
+			break;
+		}
+	}
+
 	public static void updateQosStore(String vmUuid, QosPolicy qos,
 			UPDATETYPE type) {
 		// TODO Auto-generated method stub
-		db = new DBHelper();
 		if (type == UPDATETYPE.INSERT) {
-			db.insertQos(qos);
+			QosUtil.addQos(qos);
 		} else if (type == UPDATETYPE.DELETE) {
-			db.removeQos(qos.getUuid());
+			QosUtil.removeQos(qos.getUuid());
 		} else if (type == UPDATETYPE.BAND) {
-			db.insertQosForVm(vmUuid, qos.getUuid());
+			DeviceUtil.addQosForDevice(vmUuid, qos.getUuid());
 		} else if (type == UPDATETYPE.UNBAND) {
-			db.removeQosToDevice(vmUuid, qos.getUuid());
+			DeviceUtil.removeQosForDevice(vmUuid, qos.getUuid());
 		}
-		db.closeDBConnection();
 	}
 
-	public static void updateQueueStore(String qosUuid, QosQueue queue, int i,
-			UPDATETYPE type) {
+	public static void updateQueueStore(String qosUuid, QosQueue queue,
+			int queueId, UPDATETYPE type) {
 		// TODO Auto-generated method stub
-		db = new DBHelper();
 		if (type == UPDATETYPE.INSERT) {
-			db.insertQueue(queue);
-			db.insertQueueForQos(qosUuid, queue.getUuid(), i);
+			QueueUtil.addQueue(queue);
 		} else if (type == UPDATETYPE.DELETE) {
-			db.removeQueue(queue.getUuid());
-			db.removeQueueToQos(qosUuid, queue.getUuid());
+			QueueUtil.removeQueue(queue.getUuid());
+		} else if (type == UPDATETYPE.BAND) {
+			QosUtil.addQueueForQos(qosUuid, queue.getUuid(), queueId);
+		} else if (type == UPDATETYPE.UNBAND) {
+			QosUtil.removeQueueForQos(qosUuid, queue.getUuid(), queueId);
 		}
-		db.closeDBConnection();
 	}
 
 	public static void updateSwitch(Switch sw) throws JSONException {
 		// TODO Auto-generated method stub
 		SwitchesJSON.updateSwitch(sw);
-	}
-
-	public static void updateDeviceStore(Device device, UPDATETYPE type,
-			String key) {
-		// TODO Auto-generated method stub
-		db = new DBHelper();
-		
-		switch (type) {
-		case INSERT:
-			db.insertDevice(device);
-			break;
-		case DELETE:
-			db.removeDevice(device.getVmUuid());
-			break;
-		case UPDATE:
-			db.updateDevice(key, device);
-			break;
-		case BAND:
-			db.insertQosForVm(device.getVmUuid(), device.getQosUuid());
-		default:
-			break;
-		}
-		db.closeDBConnection();
 	}
 }

@@ -10,6 +10,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.eclipse.swt.internal.C;
 
 import com.basic.elements.Device;
 import com.main.app.qos.QosPolicy;
@@ -34,7 +37,7 @@ public class DBHelper {
 		getDBConnection();
 	}
 
-	public void closeDBConnection() {
+	public void close() {
 		try {
 			if (statement != null)
 				statement.close();
@@ -45,19 +48,7 @@ public class DBHelper {
 			e.printStackTrace();
 		}
 	}
-
-	// normally execute the update sql syntax
-	private void executeUpdateStatement(String sql) {
-
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
+	
 	private void getDBConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -72,10 +63,25 @@ public class DBHelper {
 		}
 	}
 
+	/*// normally execute the update sql syntax
+	private void executeUpdateStatement(String sql) {
+
+		try {
+			if (statement.executeUpdate(sql) == 0) {
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	
+
 	// return all
-	public List<Device> getDevice() {
+	public Map<String, Device> getDevice() {
 		String sql = "SELECT * FROM `vm` LIMIT 0, 30 ";
-		List<Device> devices = new ArrayList<Device>();
+		Map<String, Device> devices = new ConcurrentHashMap<String, Device>();
+
 		try {
 			ResultSet result = statement.executeQuery(sql);
 			while (result.next()) {
@@ -86,7 +92,7 @@ public class DBHelper {
 				device.setSwitchPort(result.getString("switchPort"));
 				device.setIpAddr(result.getString("ipAddr"));
 				device.setMacAddr(result.getString("macAddr"));
-				devices.add(device);
+				devices.put(device.getVmUuid(), device);
 			}
 			result.close();
 		} catch (SQLException e) {
@@ -121,8 +127,7 @@ public class DBHelper {
 	// return all
 	public Map<String, QosPolicy> getQos() {
 		String sql = "SELECT * FROM `qos` LIMIT 0, 30 ";
-		Map<String, QosPolicy> qoses = Collections
-				.synchronizedMap(new HashMap<String, QosPolicy>());
+		Map<String, QosPolicy> qoses = new ConcurrentHashMap<String, QosPolicy>();
 		QosPolicy qos = null;
 		try {
 			ResultSet result = statement.executeQuery(sql);
@@ -180,8 +185,7 @@ public class DBHelper {
 
 	public Map<String, QosQueue> getQueue() {
 		String sql = "SELECT * FROM `queue` LIMIT 0, 30 ";
-		Map<String, QosQueue> queues = Collections
-				.synchronizedMap(new HashMap<String, QosQueue>());
+		Map<String, QosQueue> queues = new ConcurrentHashMap<String, QosQueue>();
 		QosQueue queue = null;
 		try {
 			ResultSet result = statement.executeQuery(sql);
@@ -220,17 +224,16 @@ public class DBHelper {
 		return queue;
 	}
 
-	public List<QosQueue> getQueuesForQos(String qosUuid) {
+	public Map<Integer, String> getQueuesForQos(String qosUuid) {
 		String sql = "SELECT * FROM `qostoqueue` WHERE `qosUuid` = \'"
 				+ qosUuid + "\'";
-		List<QosQueue> queues = new ArrayList<QosQueue>();
+		Map<Integer, String> queues = new ConcurrentHashMap<Integer, String>();
 		try {
 			ResultSet result = statement.executeQuery(sql);
 			while (result.next()) {
-				QosQueue queue = getQueue(result.getString("queueUuid"));
-				if (queue != null) {
-					queues.add(queue);
-				}
+				String queueUuid = result.getString("queueUuid");
+				int id = result.getInt("queueId");
+				queues.put(id, queueUuid);
 			}
 			result.close();
 		} catch (SQLException e) {
@@ -260,7 +263,7 @@ public class DBHelper {
 		executeUpdateStatement(sql);
 	}
 
-	public void insertQosForVm(String vmUuid, String qosUuid) {
+	public void insertQosForDevice(String vmUuid, String qosUuid) {
 		// TODO Auto-generated method stub
 		String sql = "SELECT * FROM `devicetoqos` WHERE `vmUuid`=\'" + vmUuid
 				+ "\'";
@@ -353,6 +356,7 @@ public class DBHelper {
 		String value = "";
 		switch (key) {
 		case "uploadRate":
+			// deal with long value
 			String sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'"
 					+ Long.valueOf(device.getUploadRate())
 					+ "\' WHERE `device`.`vmUuid` = \'" + device.getVmUuid()
@@ -363,8 +367,10 @@ public class DBHelper {
 			value = device.getVifNumber();
 			break;
 		case "switchPort":
+			value = device.getSwitchPort();
 			break;
 		case "ipAddr":
+			value = device.getIpAddr();
 			break;
 		}
 		if (!value.equals("")) {
@@ -373,5 +379,14 @@ public class DBHelper {
 					+ device.getVmUuid() + ";";
 			executeUpdateStatement(sql);
 		}
+	}*/
+
+	public ResultSet executeQuery(String sql) throws SQLException {
+		ResultSet result = statement.executeQuery(sql);
+		return result;
+	}
+	
+	public int executeUpdate(String sql) throws SQLException{
+		return statement.executeUpdate(sql);
 	}
 }

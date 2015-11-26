@@ -104,8 +104,8 @@ public class CompositeQos extends Composite {
 
 	private void populateRateLimit() {
 		// TODO Auto-generated method stub
-		if (device != null && device.getUploadRate() != null) {
-			textUpload.setText(device.getUploadRate());
+		if (device != null && device.getUploadRate() != -1) {
+			textUpload.setText(String.valueOf(device.getUploadRate()));
 		}
 		populateQosQueues();
 	}
@@ -121,9 +121,9 @@ public class CompositeQos extends Composite {
 					if (upload > 0)
 						XenTools.setUploadRate(device.getVifNumber(), upload,
 								100);
-					device.setUploadRate(String.valueOf(upload));
+					device.setUploadRate(upload);
 					DataProvider.updateDeviceStore(device, UPDATETYPE.UPDATE,
-							"uploadRate");
+							"uploadRate", upload);
 					msg = "Upload set done.";
 				} catch (NumberFormatException e) {
 					// TODO: handle exception
@@ -139,12 +139,11 @@ public class CompositeQos extends Composite {
 						if (qosUuid != null) {
 							XenTools.setPortQos(device.getVifNumber(), qosUuid);
 							qos = new QosPolicy(qosUuid, download, download);
-							DataProvider.getQoses().put(qosUuid, qos);
 							device.setQosUuid(qosUuid);
 							DataProvider.updateQosStore(device.getVmUuid(),
 									qos, UPDATETYPE.INSERT);
 							DataProvider.updateDeviceStore(device,
-									UPDATETYPE.BAND, null);
+									UPDATETYPE.BAND, null, null);
 						}
 					}
 					msg = msg + " Download set done.";

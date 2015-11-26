@@ -67,7 +67,7 @@ public class CompositeDevices extends Composite {
 								if (!device.isActive()) {
 									device.setActive(true);
 									DataProvider.updateDeviceStore(device,
-											UPDATETYPE.INSERT, null);
+											UPDATETYPE.INSERT, null, null);
 								}
 							}
 						}

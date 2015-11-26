@@ -38,6 +38,10 @@ public class QosPolicy {
 		this.uuid = uuid;
 	}
 
+	public void setQueues(Map<Integer, String> queues) {
+		this.queues = queues;
+	}
+
 	public String getSwitchdpid() {
 		return switchdpid;
 	}
