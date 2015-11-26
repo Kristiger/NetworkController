@@ -9,8 +9,7 @@ import com.basic.elements.Device;
 import com.basic.elements.Flow;
 import com.basic.elements.Port;
 import com.basic.elements.Switch;
-import com.basic.elements.UPDATE;
-import com.basic.elements.Device;
+import com.basic.elements.UPDATETYPE;
 import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
 import com.main.app.qos.QosUtil;
@@ -135,29 +134,30 @@ public class DataProvider {
 		PORT = pORT;
 	}
 
-	public static void updateQosStore(String vmUuid, QosPolicy qos, UPDATE type) {
+	public static void updateQosStore(String vmUuid, QosPolicy qos,
+			UPDATETYPE type) {
 		// TODO Auto-generated method stub
 		db = new DBHelper();
-		if (type == UPDATE.INSERT) {
+		if (type == UPDATETYPE.INSERT) {
 			db.insertQos(qos);
-		} else if (type == UPDATE.DELETE) {
+		} else if (type == UPDATETYPE.DELETE) {
 			db.removeQos(qos.getUuid());
-		} else if (type == UPDATE.BAND) {
+		} else if (type == UPDATETYPE.BAND) {
 			db.insertQosForVm(vmUuid, qos.getUuid());
-		} else if (type == UPDATE.UNBAND) {
-			db.removeQosToVm(vmUuid, qos.getUuid());
+		} else if (type == UPDATETYPE.UNBAND) {
+			db.removeQosToDevice(vmUuid, qos.getUuid());
 		}
 		db.closeDBConnection();
 	}
 
 	public static void updateQueueStore(String qosUuid, QosQueue queue, int i,
-			UPDATE type) {
+			UPDATETYPE type) {
 		// TODO Auto-generated method stub
 		db = new DBHelper();
-		if (type == UPDATE.INSERT) {
+		if (type == UPDATETYPE.INSERT) {
 			db.insertQueue(queue);
 			db.insertQueueForQos(qosUuid, queue.getUuid(), i);
-		} else if (type == UPDATE.DELETE) {
+		} else if (type == UPDATETYPE.DELETE) {
 			db.removeQueue(queue.getUuid());
 			db.removeQueueToQos(qosUuid, queue.getUuid());
 		}
@@ -169,13 +169,25 @@ public class DataProvider {
 		SwitchesJSON.updateSwitch(sw);
 	}
 
-	public static void updateVmStore(Device vm, UPDATE type) {
+	public static void updateDeviceStore(Device device, UPDATETYPE type,
+			String key) {
 		// TODO Auto-generated method stub
 		db = new DBHelper();
-		if (type == UPDATE.INSERT) {
-			db.insertDevice(vm);
-		} else if (type == UPDATE.DELETE) {
-			db.removeVm(vm.getVmUuid());
+		
+		switch (type) {
+		case INSERT:
+			db.insertDevice(device);
+			break;
+		case DELETE:
+			db.removeDevice(device.getVmUuid());
+			break;
+		case UPDATE:
+			db.updateDevice(key, device);
+			break;
+		case BAND:
+			db.insertQosForVm(device.getVmUuid(), device.getQosUuid());
+		default:
+			break;
 		}
 		db.closeDBConnection();
 	}

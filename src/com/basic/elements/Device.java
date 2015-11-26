@@ -15,7 +15,7 @@ public class Device {
 	private String uploadRate;
 	
 	private Date lastSeen;
-	private boolean isActive;
+	private boolean isActive = false;
 	
 	public Device(){
 	}

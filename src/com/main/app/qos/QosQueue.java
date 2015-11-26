@@ -15,7 +15,7 @@ public class QosQueue {
 	}
 	
 	public QosQueue(String uuid, long maxRate, long minRate){
-		this(minRate,maxRate);
+		this(maxRate,minRate);
 		this.uuid = uuid;
 	}
 	

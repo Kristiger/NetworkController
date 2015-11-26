@@ -21,6 +21,7 @@ public class DevicesJSON {
 	private static String PORT = DataProvider.getPORT();
 	private static JSONObject obj;
 	private static JSONArray jsonip;
+	private static Map<String, Device> devs = null;
 
 	/**
 	 * Get the string IDs of all the switches and create switch summary objects
@@ -31,8 +32,10 @@ public class DevicesJSON {
 	 */
 	public static Map<String, Device> getDeviceSummaries() throws JSONException {
 
-		Map<String, Device> devs = new ConcurrentHashMap<String, Device>();
-
+		if(devs == null){
+			devs = new ConcurrentHashMap<String, Device>();
+		}
+		
 		try {
 			Future<Object> devices = Deserializer
 					.readJsonArrayFromURL("http://" + IP + ":" + PORT
@@ -49,7 +52,7 @@ public class DevicesJSON {
 				if (obj.getJSONArray("ipv4").isNull(0)
 						|| obj.getJSONArray("attachmentPoint").isNull(0)
 						|| obj.getJSONArray("attachmentPoint").getJSONObject(0)
-								.getInt("port") < 1) {
+								.getInt("port") <= 1) {
 					continue;
 				}
 

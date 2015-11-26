@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.basic.elements.Device;
-import com.basic.elements.UPDATE;
+import com.basic.elements.UPDATETYPE;
 import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
 import com.main.provider.DataProvider;
@@ -45,7 +45,6 @@ public class CompositeQos extends Composite {
 	private QosQueue queue;
 	private QosPolicy qos;
 	private final int MAXQUEUE = 7;
-	private DBHelper db;
 
 	/**
 	 * Create the composite.
@@ -123,6 +122,8 @@ public class CompositeQos extends Composite {
 						XenTools.setUploadRate(device.getVifNumber(), upload,
 								100);
 					device.setUploadRate(String.valueOf(upload));
+					DataProvider.updateDeviceStore(device, UPDATETYPE.UPDATE,
+							"uploadRate");
 					msg = "Upload set done.";
 				} catch (NumberFormatException e) {
 					// TODO: handle exception
@@ -140,7 +141,10 @@ public class CompositeQos extends Composite {
 							qos = new QosPolicy(qosUuid, download, download);
 							DataProvider.getQoses().put(qosUuid, qos);
 							device.setQosUuid(qosUuid);
-							DataProvider.updateQosStore(device.getVmUuid(), qos, UPDATE.INSERT);
+							DataProvider.updateQosStore(device.getVmUuid(),
+									qos, UPDATETYPE.INSERT);
+							DataProvider.updateDeviceStore(device,
+									UPDATETYPE.BAND, null);
 						}
 					}
 					msg = msg + " Download set done.";
@@ -181,7 +185,7 @@ public class CompositeQos extends Composite {
 												queueUuid);
 										DataProvider.updateQueueStore(
 												qos.getUuid(), queue, i,
-												UPDATE.INSERT);
+												UPDATETYPE.INSERT);
 										DisplayMessage.displayStatus(
 												MainFrame.getShell(),
 												"Add to qos done.Queue ID : "
@@ -232,7 +236,11 @@ public class CompositeQos extends Composite {
 
 				// remove from database
 				DataProvider.updateQueueStore(device.getQosUuid(), queue, id,
-						UPDATE.DELETE);
+						UPDATETYPE.DELETE);
+
+				DisplayMessage.displayStatus(MainFrame.getShell(), "Queue "
+						+ id + " deleted");
+				populateQosQueues();
 			}
 		}
 	}
@@ -254,6 +262,7 @@ public class CompositeQos extends Composite {
 					String[] data = ids.toArray(new String[ids.size()]);
 					comboDelete.setItems(data);
 					comboDelete.select(0);
+					populateQueue(0);
 				} else {
 					comboDelete.setItems(new String[] { "None" });
 				}

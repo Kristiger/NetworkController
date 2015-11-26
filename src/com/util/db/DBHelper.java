@@ -46,6 +46,18 @@ public class DBHelper {
 		}
 	}
 
+	// normally execute the update sql syntax
+	private void executeUpdateStatement(String sql) {
+
+		try {
+			if (statement.executeUpdate(sql) == 0) {
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private void getDBConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -58,6 +70,52 @@ public class DBHelper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	// return all
+	public List<Device> getDevice() {
+		String sql = "SELECT * FROM `vm` LIMIT 0, 30 ";
+		List<Device> devices = new ArrayList<Device>();
+		try {
+			ResultSet result = statement.executeQuery(sql);
+			while (result.next()) {
+				Device device = new Device();
+				device.setVmUuid(result.getString("vmUuid"));
+				device.setVifUuid(result.getString("vifUuid"));
+				device.setVifNumber(result.getString("vifNumber"));
+				device.setSwitchPort(result.getString("switchPort"));
+				device.setIpAddr(result.getString("ipAddr"));
+				device.setMacAddr(result.getString("macAddr"));
+				devices.add(device);
+			}
+			result.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return devices;
+	}
+
+	public Device getDevice(String vmUuid) {
+		String sql = "SELECT * FROM `device` WHERE `vmUuid` = \'" + vmUuid
+				+ "\' LIMIT 0, 30 ";
+		Device device = new Device();
+		try {
+			ResultSet result = statement.executeQuery(sql);
+			if (result.next()) {
+				device.setVmUuid(result.getString("vmUuid"));
+				device.setVifUuid(result.getString("vifUuid"));
+				device.setVifNumber(result.getString("vifNumber"));
+				device.setSwitchPort(result.getString("switchPort"));
+				device.setIpAddr(result.getString("ipAddr"));
+				device.setMacAddr(result.getString("macAddr"));
+			}
+			result.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return device;
 	}
 
 	// return all
@@ -103,8 +161,8 @@ public class DBHelper {
 		return qos;
 	}
 
-	public QosPolicy getQosForVm(String vmUuid) {
-		String sql = "SELECT * FROM `vmtoqos` WHERE `vmUuid` = \'" + vmUuid
+	public QosPolicy getQosForDevice(String vmUuid) {
+		String sql = "SELECT * FROM `devicetoqos` WHERE `vmUuid` = \'" + vmUuid
 				+ "\'";
 		QosPolicy qos = null;
 		try {
@@ -182,50 +240,15 @@ public class DBHelper {
 		return queues;
 	}
 
-	// return all
-	public List<Device> getDevice() {
-		String sql = "SELECT * FROM `vm` LIMIT 0, 30 ";
-		List<Device> vms = new ArrayList<Device>();
-		try {
-			ResultSet result = statement.executeQuery(sql);
-			while (result.next()) {
-				Device vm = new Device();
-				vm.setVmUuid(result.getString("vmUuid"));
-				vm.setVifUuid(result.getString("vifUuid"));
-				vm.setVifNumber(result.getString("vifNumber"));
-				vm.setSwitchPort(result.getString("switchPort"));
-				vm.setIpAddr(result.getString("ipAddr"));
-				vm.setMacAddr(result.getString("macAddr"));
-				vms.add(vm);
-			}
-			result.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return vms;
-	}
-
-	public Device getDevice(String vmUuid) {
-		String sql = "SELECT * FROM `vm` WHERE `vmUuid` = \'" + vmUuid
-				+ "\' LIMIT 0, 30 ";
-		Device vm = new Device();
-		try {
-			ResultSet result = statement.executeQuery(sql);
-			if (result.next()) {
-				vm.setVmUuid(result.getString("vmUuid"));
-				vm.setVifUuid(result.getString("vifUuid"));
-				vm.setVifNumber(result.getString("vifNumber"));
-				vm.setSwitchPort(result.getString("switchPort"));
-				vm.setIpAddr(result.getString("ipAddr"));
-				vm.setMacAddr(result.getString("macAddr"));
-			}
-			result.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return vm;
+	public void insertDevice(Device device) {
+		String sql = "INSERT INTO `mydatabase`.`device` "
+				+ "(`id`, `vmUuid`, `vifUuid`, `vifNumber`, `switchPort`, `ipAddr`, `macAddr`)"
+				+ " VALUES (NULL, \'" + device.getVmUuid() + "\'," + " \'"
+				+ device.getVifUuid() + "\', " + "\'" + device.getVifNumber()
+				+ "\', " + "\'" + device.getSwitchPort() + "\', " + "\'"
+				+ device.getIpAddr() + "\', " + "\'" + device.getMacAddr()
+				+ "\');";
+		executeUpdateStatement(sql);
 	}
 
 	public void insertQos(QosPolicy qos) {
@@ -234,174 +257,121 @@ public class DBHelper {
 				+ qos.getUuid()
 				+ "\', \'"
 				+ qos.getMinRate() + "\', \'" + qos.getMaxRate() + "\');";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		executeUpdateStatement(sql);
 	}
 
 	public void insertQosForVm(String vmUuid, String qosUuid) {
 		// TODO Auto-generated method stub
-		String sql = "INSERT INTO `mydatabase`.`vmtoqos` (`id`, `vmUuid`, `qosUuid`) VALUES (NULL, \'"
-				+ vmUuid + "\', \'" + qosUuid + "\');";
+		String sql = "SELECT * FROM `devicetoqos` WHERE `vmUuid`=\'" + vmUuid
+				+ "\'";
+		ResultSet result;
 		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
+			// see if there is a qos to device exist, if yes, remove it.
+			result = statement.executeQuery(sql);
+			if (result.getRow() != 0) {
+				removeQosToDevice(result.getString("vmUuid"),
+						result.getString("qosUuid"));
 			}
+
+			// insert qos
+			sql = "INSERT INTO `mydatabase`.`devicetoqos` (`id`, `vmUuid`, `qosUuid`) VALUES (NULL, \'"
+					+ vmUuid + "\', \'" + qosUuid + "\');";
+			executeUpdateStatement(sql);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
 	}
 
 	public void insertQueue(QosQueue queue) {
-		String sql = "INSERT INTO `mydatabase`.`queue` (`id`, `queueUuid`, `queueId`, `maxRate`, `minRate`) "
+		String sql = "INSERT INTO `mydatabase`.`queue` (`id`, `queueUuid`, `maxRate`, `minRate`) "
 				+ "VALUES (NULL, \'"
 				+ queue.getUuid()
 				+ "\', \'"
 				+ queue.getMaxRate() + "\', \'" + queue.getMinRate() + "\');";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		executeUpdateStatement(sql);
 	}
 
 	public void insertQueueForQos(String qosUuid, String queueUuid, int queueId) {
 		// TODO Auto-generated method stub
-		String sql = "INSERT INTO `mydatabase`.`qostoqueue` (`id`, `qosUuid`, `queueUuid`, `queueId`) VALUES (NULL, \'"
-				+ qosUuid + "\', \'" + queueId + "\', \'" + queueId + "\');";
+
+		String sql = "SELECT * FROM `qostoqueue` WHERE `qosUuid`=\'" + qosUuid
+				+ "\' AND `queueId`=" + queueId;
+		ResultSet result;
 		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
+			// see if there is a queue to qos exist, if yes, remove it.
+			result = statement.executeQuery(sql);
+			if (result.getRow() != 0) {
+				removeQueueToQos(result.getString("qosUuid"),
+						result.getString("queueUuid"));
 			}
+			sql = "INSERT INTO `mydatabase`.`qostoqueue` (`id`, `qosUuid`, `queueUuid`, `queueId`) VALUES (NULL, \'"
+					+ qosUuid
+					+ "\', \'"
+					+ queueUuid
+					+ "\', \'"
+					+ queueId
+					+ "\');";
+			executeUpdateStatement(sql);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void insertDevice(Device vm) {
-		String sql = "INSERT INTO `mydatabase`.`vm` "
-				+ "(`id`, `vmUuid`, `vifUuid`, `vifNumber`, `switchPort`, `ipAddr`, `macAddr`)"
-				+ " VALUES (NULL, \'" + vm.getVmUuid() + "\'," + " \'"
-				+ vm.getVifUuid() + "\', " + "\'" + vm.getVifNumber() + "\', " + "\'"
-				+ vm.getSwitchPort() + "\', " + "\'" + vm.getIpAddr()
-				+ "\', " + "\'" + vm.getMacAddr() + "\');";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void removeDevice(String vmUuid) {
+		String sql = "DELETE FROM `device` WHERE `vmUuid`=\'" + vmUuid + "\'";
+		executeUpdateStatement(sql);
 	}
 
-	public boolean removeQos(String qosUuid) {
+	public void removeQos(String qosUuid) {
 		String sql = "DELETE FROM `qos` WHERE `qosUuid`=\'" + qosUuid + "\'";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		return true;
+		executeUpdateStatement(sql);
 	}
 
-	public void removeQosToVm(String vmUuid, String qosUuid) {
+	public void removeQosToDevice(String vmUuid, String qosUuid) {
 		// TODO Auto-generated method stub
-		String sql = "DELETE FROM `qostovm` WHERE `qosUuid`=\'" + qosUuid
+		String sql = "DELETE FROM `devicetoqos` WHERE `qosUuid`=\'" + qosUuid
 				+ "\' AND `vmUuid`=\'" + vmUuid + "\'";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch blocks
-			e.printStackTrace();
-		}
+		executeUpdateStatement(sql);
 	}
 
-	public boolean removeQueue(String queueUuid) {
-		try {
-			String sql = "DELETE FROM `queue` WHERE `queueUuid`=\'" + queueUuid
-					+ "\'";
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		return true;
+	public void removeQueue(String queueUuid) {
+		String sql = "DELETE FROM `queue` WHERE `queueUuid`=\'" + queueUuid
+				+ "\'";
+		executeUpdateStatement(sql);
 	}
 
 	public void removeQueueToQos(String qosUuid, String queueUuid) {
 		// TODO Auto-generated method stub
-		String sql = "DELETE FROM `queuetoqos` WHERE `qosUuid`=\'" + qosUuid
+		String sql = "DELETE FROM `qostoqueue` WHERE `qosUuid`=\'" + qosUuid
 				+ "\' AND `queueUuid`=\'" + queueUuid + "\'";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		executeUpdateStatement(sql);
 	}
 
-	public void removeVm(String vmUuid) {
-		String sql = "DELETE FROM `vm` WHERE `vmUuid`=\'" + vmUuid + "\'";
-		try {
-			if (statement.executeUpdate(sql) == 0) {
-				throw new Exception("Insert return 0 changes");
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void updateDevice(String key, Device device) {
+		// TODO Auto-generated method stub
+		String value = "";
+		switch (key) {
+		case "uploadRate":
+			String sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'"
+					+ Long.valueOf(device.getUploadRate())
+					+ "\' WHERE `device`.`vmUuid` = \'" + device.getVmUuid()
+					+ "\';";
+			executeUpdateStatement(sql);
+			break;
+		case "vifNumber":
+			value = device.getVifNumber();
+			break;
+		case "switchPort":
+			break;
+		case "ipAddr":
+			break;
+		}
+		if (!value.equals("")) {
+			String sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'"
+					+ value + "\' WHERE `device`.`vmUuid` = "
+					+ device.getVmUuid() + ";";
+			executeUpdateStatement(sql);
 		}
 	}
 }

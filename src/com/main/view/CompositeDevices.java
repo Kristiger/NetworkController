@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.basic.elements.Device;
+import com.basic.elements.UPDATETYPE;
 import com.main.provider.DataProvider;
 import com.tools.util.JSONException;
 import com.util.xen.XenTools;
@@ -61,6 +62,15 @@ public class CompositeDevices extends Composite {
 				while (true) {
 					try {
 						devices = DataProvider.getDevices(true);
+						if (devices != null) {
+							for (Device device : devices.values()) {
+								if (!device.isActive()) {
+									device.setActive(true);
+									DataProvider.updateDeviceStore(device,
+											UPDATETYPE.INSERT, null);
+								}
+							}
+						}
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -135,7 +145,7 @@ public class CompositeDevices extends Composite {
 			lblVifPort_1.setText(currentDevice.getVifNumber());
 		else
 			lblVifPort_1.setText("None");
-		
+
 		if (currentDevice.getSwitchPort() != null)
 			lblSwitchport_1.setText(currentDevice.getSwitchPort());
 		else

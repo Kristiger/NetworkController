@@ -13,7 +13,7 @@ import com.tools.util.JSONException;
 import com.util.xen.XenTools;
 
 public class DeviceUtil {
-	private static Map<String, Device> devices = new ConcurrentHashMap<String, Device>();
+	private static Map<String, Device> devices = null;
 
 	private static void getDeviceFromController() throws JSONException {
 		devices = DevicesJSON.getDeviceSummaries();
@@ -49,7 +49,7 @@ public class DeviceUtil {
 
 	public static Map<String, Device> getDevices(boolean update)
 			throws JSONException {
-		if (update) {
+		if (update || devices == null) {
 			getDeviceFromController();
 			getDeviceFromXenServer();
 		}
