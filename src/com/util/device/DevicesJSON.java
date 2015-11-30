@@ -59,6 +59,7 @@ public class DevicesJSON {
 					temp = devs.get(mac);
 				} else {
 					temp = new Device(mac);
+					temp.setActive(false);
 					devs.put(temp.getMacAddr(), temp);
 				}
 

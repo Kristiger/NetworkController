@@ -14,6 +14,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
@@ -36,13 +37,11 @@ import com.main.provider.DataProvider;
 import com.main.view.util.DisplayMessage;
 import com.tools.util.JSONException;
 
-import org.eclipse.swt.widgets.Combo;
-
 public class CompositeStaticFlow extends Composite {
 	private Text textFlowName, textPriority;
 	private Table tableAction, tableMatch;
 	private Tree treeSwitch, treeFlows, treeAction;
-	private TableEditor flowEditor, actionEditor, matchEditor;
+	private TableEditor actionEditor, matchEditor;
 	private Flow flow;
 	private static Switch currentSwtich;
 	private static Action currentAction;
@@ -69,11 +68,9 @@ public class CompositeStaticFlow extends Composite {
 
 	private void disposeEditors(String editor) {
 		// Dispose the editor do it doesn't leave a ghost table item
-		if (actionEditor.getEditor() != null
-				&& ((editor.equals("action") || editor.equals("all"))))
+		if (actionEditor.getEditor() != null && ((editor.equals("action") || editor.equals("all"))))
 			actionEditor.getEditor().dispose();
-		if (matchEditor.getEditor() != null
-				&& ((editor.equals("match") || editor.equals("all"))))
+		if (matchEditor.getEditor() != null && ((editor.equals("match") || editor.equals("all"))))
 			matchEditor.getEditor().dispose();
 	}
 
@@ -122,11 +119,9 @@ public class CompositeStaticFlow extends Composite {
 			treeSwitch.select(item);
 
 			if (DataProvider.getStaticFlows(currentSwtichDpid, true).size() > 0) {
-				for (Flow flow : DataProvider.getStaticFlows(currentSwtichDpid,
-						true).values()) {
+				for (Flow flow : DataProvider.getStaticFlows(currentSwtichDpid, true).values()) {
 					if (flow.getName() != null) {
-						new TreeItem(treeFlows, SWT.NONE).setText(flow
-								.getName());
+						new TreeItem(treeFlows, SWT.NONE).setText(flow.getName());
 					}
 				}
 			} else {
@@ -143,8 +138,7 @@ public class CompositeStaticFlow extends Composite {
 
 	private void populateFlowView(String flowname) {
 		try {
-			flow = DataProvider.getStaticFlows(currentSwtichDpid, false).get(
-					flowname);
+			flow = DataProvider.getStaticFlows(currentSwtichDpid, false).get(flowname);
 		} catch (IOException | JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -212,17 +206,25 @@ public class CompositeStaticFlow extends Composite {
 	}
 
 	private void setupNewFlow() {
-		if (currentSwtich != null) {
-			flow = new Flow(currentSwtichDpid);
-			textFlowName.setText("");
-			textPriority.setText("");
-			newFlow = true;
+		if (!unsavedProgress) {
+			if (currentSwtich != null) {
+				flow = new Flow(currentSwtichDpid);
+				textFlowName.setText("");
+				textPriority.setText("");
+				newFlow = true;
 
-			populateActionTree();
-			populateMatchTable();
+				populateActionTree();
+				populateMatchTable();
+			} else {
+				DisplayMessage.displayError(MainFrame.getShell(), "Choose a switch first");
+			}
 		} else {
-			DisplayMessage.displayError(MainFrame.getShell(),
-					"Choose a switch first");
+			MessageBox msg = new MessageBox(MainFrame.getShell(), SWT.APPLICATION_MODAL | SWT.YES | SWT.NO);
+			msg.setMessage("Progress Unsaved, ");
+			if(msg.open() == SWT.YES){
+				unsavedProgress = false;
+				setupNewFlow();
+			}
 		}
 	}
 
@@ -324,11 +326,9 @@ public class CompositeStaticFlow extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				if (flow != null && flow.getActions().size() > 0) {
 					if (flow != null) {
-						if (flow.getName() != null
-								|| !textFlowName.getText().equals("")) {
+						if (flow.getName() != null || !textFlowName.getText().equals("")) {
 
-							if (FlowManagerPusher
-									.errorChecksPassed(textPriority.getText())) {
+							if (FlowManagerPusher.errorChecksPassed(textPriority.getText())) {
 								// Parse the changes made to the flow
 								flow.setName(textFlowName.getText());
 								flow.setPriority(textPriority.getText());
@@ -337,11 +337,9 @@ public class CompositeStaticFlow extends Composite {
 								String response;
 								try {
 									response = FlowManagerPusher.push(flow);
-									if (response
-											.equals("Flow successfully pushed down to switches")) {
+									if (response.equals("Flow successfully pushed down to switches")) {
 										if (currentSwtich != null) {
-											populateFlowTree(treeSwitch
-													.getSelection()[0]);
+											populateFlowTree(treeSwitch.getSelection()[0]);
 										} else {
 											populateSwitchTree();
 										}
@@ -349,23 +347,19 @@ public class CompositeStaticFlow extends Composite {
 										disposeEditors("all");
 										unsavedProgress = false;
 									}
-									DisplayMessage.displayStatus(
-											MainFrame.getShell(), response);
+									DisplayMessage.displayStatus(MainFrame.getShell(), response);
 								} catch (IOException | JSONException e1) {
-									DisplayMessage.displayError(
-											MainFrame.getShell(),
+									DisplayMessage.displayError(MainFrame.getShell(),
 											"Problem occured while pushing flow, please view the log for details");
 									e1.printStackTrace();
 								}
 							}
 
 						} else {
-							DisplayMessage.displayError(MainFrame.getShell(),
-									"Your flow must have a name");
+							DisplayMessage.displayError(MainFrame.getShell(), "Your flow must have a name");
 						}
 					} else {
-						DisplayMessage.displayError(MainFrame.getShell(),
-								"You do not have a flow to push!");
+						DisplayMessage.displayError(MainFrame.getShell(), "You do not have a flow to push!");
 					}
 				}
 			}
@@ -391,22 +385,18 @@ public class CompositeStaticFlow extends Composite {
 					String response;
 					try {
 						response = FlowManagerPusher.remove(flow);
-						if (response.equals("Entry " + flow.getName()
-								+ " deleted")) {
+						if (response.equals("Entry " + flow.getName() + " deleted")) {
 							populateFlowTree(treeSwitch.getSelection()[0]);
 							disposeEditors("all");
-							DisplayMessage.displayStatus(MainFrame.getShell(),
-									response);
+							DisplayMessage.displayStatus(MainFrame.getShell(), response);
 						}
 					} catch (IOException | JSONException e1) {
 						// TODO Auto-generated catch block
-						DisplayMessage.displayError(MainFrame.getShell(),
-								"Problem occured while delete flow.");
+						DisplayMessage.displayError(MainFrame.getShell(), "Problem occured while delete flow.");
 						e1.printStackTrace();
 					}
 				} else {
-					DisplayMessage.displayError(MainFrame.getShell(),
-							"Must select a flow to delete.");
+					DisplayMessage.displayError(MainFrame.getShell(), "Must select a flow to delete.");
 				}
 			}
 		});
@@ -419,11 +409,9 @@ public class CompositeStaticFlow extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				// are you sure? warning
 				int style = SWT.APPLICATION_MODAL | SWT.YES | SWT.NO;
-				MessageBox messageBox = new MessageBox(MainFrame.getShell(),
-						style);
+				MessageBox messageBox = new MessageBox(MainFrame.getShell(), style);
 				messageBox.setText("Are you sure?!");
-				messageBox
-						.setMessage("Are you sure you wish to delete all flows?");
+				messageBox.setMessage("Are you sure you wish to delete all flows?");
 				if (messageBox.open() == SWT.YES) {
 					// Delete all the flows for the current switch, populate
 					// the table with the new information
@@ -477,8 +465,7 @@ public class CompositeStaticFlow extends Composite {
 				disposeEditors("action");
 				// Populate the action table, if we actually have actions.
 				if (!treeAction.getSelection()[0].getText(0).equals("None"))
-					populateActionTable(treeAction.indexOf(treeAction
-							.getSelection()[0]));
+					populateActionTable(treeAction.indexOf(treeAction.getSelection()[0]));
 			}
 		});
 		FormData fd_treeAction = new FormData();
@@ -504,8 +491,7 @@ public class CompositeStaticFlow extends Composite {
 						public void modifyText(ModifyEvent arg0) {
 							// TODO Auto-generated method stub
 							Text text = (Text) actionEditor.getEditor();
-							actionEditor.getItem().setText(EDITABLECOLUMN,
-									text.getText());
+							actionEditor.getItem().setText(EDITABLECOLUMN, text.getText());
 						}
 					});
 					newEditor.selectAll();
@@ -551,8 +537,7 @@ public class CompositeStaticFlow extends Composite {
 						public void modifyText(ModifyEvent arg0) {
 							// TODO Auto-generated method stub
 							Text text = (Text) matchEditor.getEditor();
-							matchEditor.getItem().setText(EDITABLECOLUMN,
-									text.getText());
+							matchEditor.getItem().setText(EDITABLECOLUMN, text.getText());
 						}
 					});
 					newEditor.selectAll();
@@ -621,11 +606,8 @@ public class CompositeStaticFlow extends Composite {
 				if (flow != null) {
 					if (currentAction != null) {
 						if (!tableAction.getItems()[0].getText(1).isEmpty()) {
-							if (ActionToTable.errorChecksPassed(currentSwtich,
-									currentAction, tableAction.getItems())) {
-								ActionManagerPusher.addAction(
-										tableAction.getItems(), currentAction,
-										flow);
+							if (ActionToTable.errorChecksPassed(currentSwtich, currentAction, tableAction.getItems())) {
+								ActionManagerPusher.addAction(tableAction.getItems(), currentAction, flow);
 
 								disposeEditors("action");
 								populateActionTree();
@@ -635,8 +617,7 @@ public class CompositeStaticFlow extends Composite {
 									"Must enter a value before you save an action");
 						}
 					} else {
-						DisplayMessage.displayError(MainFrame.getShell(),
-								"Must create an action to save");
+						DisplayMessage.displayError(MainFrame.getShell(), "Must create an action to save");
 					}
 				} else {
 					DisplayMessage.displayError(MainFrame.getShell(),
@@ -645,8 +626,7 @@ public class CompositeStaticFlow extends Composite {
 			}
 		});
 		FormData fd_btnSaveaction = new FormData();
-		fd_btnSaveaction.bottom = new FormAttachment(tableAction, 45,
-				SWT.BOTTOM);
+		fd_btnSaveaction.bottom = new FormAttachment(tableAction, 45, SWT.BOTTOM);
 		fd_btnSaveaction.right = new FormAttachment(treeAction, 120, SWT.RIGHT);
 		fd_btnSaveaction.top = new FormAttachment(tableAction, 10, SWT.BOTTOM);
 		fd_btnSaveaction.left = new FormAttachment(treeAction, 10);
@@ -658,17 +638,14 @@ public class CompositeStaticFlow extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (flow != null) {
-					if (MatchToTable.errorChecksPassed(currentSwtich,
-							tableMatch.getItems())) {
-						flow.setMatch(MatchManagerPusher.addMatch(tableMatch
-								.getItems()));
+					if (MatchToTable.errorChecksPassed(currentSwtich, tableMatch.getItems())) {
+						flow.setMatch(MatchManagerPusher.addMatch(tableMatch.getItems()));
 
 						unsavedProgress = true;
 						disposeEditors("match");
 					}
 				} else {
-					DisplayMessage.displayError(MainFrame.getShell(),
-							"Must select or create first");
+					DisplayMessage.displayError(MainFrame.getShell(), "Must select or create first");
 				}
 
 			}
@@ -689,15 +666,12 @@ public class CompositeStaticFlow extends Composite {
 				if (flow != null) {
 					setupNewAction(combo.getItem(combo.getSelectionIndex()));
 				} else {
-					DisplayMessage.displayError(MainFrame.getShell(),
-							"Must select or create a flow.");
+					DisplayMessage.displayError(MainFrame.getShell(), "Must select or create a flow.");
 				}
 			}
 		});
-		combo.setItems(new String[] { "output", "enqueue", "strip_vlan",
-				"set_vlan_vid", "set_vlan_pcp", "set_eth_src", "set_eth_dst",
-				"set_ip_tos", "set_ipv4_src", "set_ipv4_dst", "set_tp_src",
-				"set_tp_dst" });
+		combo.setItems(new String[] { "output", "enqueue", "strip_vlan", "set_vlan_vid", "set_vlan_pcp", "set_eth_src",
+				"set_eth_dst", "set_ip_tos", "set_ipv4_src", "set_ipv4_dst", "set_tp_src", "set_tp_dst" });
 		FormData fd_combo = new FormData();
 		fd_combo.bottom = new FormAttachment(tableAction, -6);
 		fd_combo.right = new FormAttachment(treeAction, 130, SWT.RIGHT);
@@ -711,8 +685,7 @@ public class CompositeStaticFlow extends Composite {
 				if (flow != null) {
 					populateNewMatchTable();
 				} else {
-					DisplayMessage.displayError(MainFrame.getShell(),
-							"Must select or create a flow first");
+					DisplayMessage.displayError(MainFrame.getShell(), "Must select or create a flow first");
 				}
 			}
 		});
@@ -734,18 +707,15 @@ public class CompositeStaticFlow extends Composite {
 						populateActionTree();
 					}
 				} else {
-					DisplayMessage.displayError(MainFrame.getShell(),
-							"Must select or create a flow");
+					DisplayMessage.displayError(MainFrame.getShell(), "Must select or create a flow");
 				}
 			}
 		});
 		FormData fd_btnNewButton_1 = new FormData();
 		fd_btnNewButton_1.top = new FormAttachment(btnSaveaction, 0, SWT.TOP);
 		fd_btnNewButton_1.left = new FormAttachment(btnSaveaction, 6);
-		fd_btnNewButton_1.bottom = new FormAttachment(btnSaveaction, 0,
-				SWT.BOTTOM);
-		fd_btnNewButton_1.right = new FormAttachment(btnSaveaction, 116,
-				SWT.RIGHT);
+		fd_btnNewButton_1.bottom = new FormAttachment(btnSaveaction, 0, SWT.BOTTOM);
+		fd_btnNewButton_1.right = new FormAttachment(btnSaveaction, 116, SWT.RIGHT);
 		btnNewButton_1.setLayoutData(fd_btnNewButton_1);
 		btnNewButton_1.setText("Remove");
 	}

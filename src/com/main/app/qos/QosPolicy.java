@@ -93,4 +93,14 @@ public class QosPolicy {
 	public Map<Integer, String> getQueues() {
 		return queues;
 	}
+
+	/* 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "QosPolicy [uuid=" + uuid + ", switchdpid=" + switchdpid
+				+ ", vifport=" + vifport + ", maxRate=" + maxRate
+				+ ", minRate=" + minRate + ", queues=" + queues + "]";
+	}
 }

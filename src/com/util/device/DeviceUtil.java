@@ -21,9 +21,8 @@ public class DeviceUtil {
 	private static DBHelper db = null;
 
 	public static void addDevice(Device device) {
-		if (!devices.containsKey(device.getVmUuid())) {
-			devices.put(device.getVmUuid(), device);
-
+		// newly get from sw
+		if (!device.isActive()) {
 			db = new DBHelper();
 			String sql = "INSERT INTO `mydatabase`.`device` "
 					+ "(`id`, `vmUuid`, `vifUuid`, `vifNumber`, `switchPort`, `ipAddr`, `macAddr`)"
@@ -37,6 +36,9 @@ public class DeviceUtil {
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Insert device, 0 returned.");
 				}
+				
+				// means it has update to db
+				device.setActive(true);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -47,26 +49,26 @@ public class DeviceUtil {
 		}
 	}
 
-	public static void addQosForDevice(String vmUuid, String qosUuid) {
+	public static void addQosForDevice(String mac, String qosUuid) {
 		// TODO Auto-generated method stub
-		if (devices.containsKey(vmUuid)) {
-			devices.get(vmUuid).setQosUuid(qosUuid);
+		if (devices.containsKey(mac)) {
+			devices.get(mac).setQosUuid(qosUuid);
 
 			db = new DBHelper();
-			String sql = "SELECT * FROM `devicetoqos` WHERE `vmUuid`=\'"
-					+ vmUuid + "\'";
+			String sql = "SELECT * FROM `devicetoqos` WHERE `macAddr`=\'" + mac
+					+ "\'";
 			ResultSet result;
 			try {
 				// see if there is a qos to device exist, if yes, remove it.
 				result = db.executeQuery(sql);
 				if (result.getRow() != 0) {
-					removeQosForDevice(result.getString("vmUuid"),
+					removeQosForDevice(result.getString("macAddr"),
 							result.getString("qosUuid"));
 				}
 
 				// insert qos
-				sql = "INSERT INTO `mydatabase`.`devicetoqos` (`id`, `vmUuid`, `qosUuid`) VALUES (NULL, \'"
-						+ vmUuid + "\', \'" + qosUuid + "\');";
+				sql = "INSERT INTO `mydatabase`.`devicetoqos` (`id`, `macAddr`, `qosUuid`) VALUES (NULL, \'"
+						+ mac + "\', \'" + qosUuid + "\');";
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Insert qos for device, 0 returned.");
 				}
@@ -82,8 +84,8 @@ public class DeviceUtil {
 		}
 	}
 
-	public static Device getDevice(String vmUuid) {
-		return devices.get(vmUuid);
+	public static Device getDevice(String mac) {
+		return devices.get(mac);
 	}
 
 	private static void getDeviceFromController() throws JSONException {
@@ -100,6 +102,9 @@ public class DeviceUtil {
 							if (port.getPortNumber().equals(
 									device.getSwitchPort())) {
 								device.setVifNumber(port.getName());
+								if(device.isActive() == false){
+									addDevice(device);
+								}
 								break;
 							}
 						}
@@ -123,7 +128,7 @@ public class DeviceUtil {
 
 	public static Map<String, Device> getDevices() throws JSONException {
 		getDeviceFromController();
-		getDeviceFromXenServer();
+		// getDeviceFromXenServer();
 		return devices;
 	}
 
@@ -141,7 +146,8 @@ public class DeviceUtil {
 				device.setSwitchPort(result.getString("switchPort"));
 				device.setIpAddr(result.getString("ipAddr"));
 				device.setMacAddr(result.getString("macAddr"));
-				devices.put(device.getVmUuid(), device);
+				device.setActive(true);
+				devices.put(device.getMacAddr(), device);
 			}
 			result.close();
 		} catch (SQLException e) {
@@ -153,17 +159,27 @@ public class DeviceUtil {
 		return devices;
 	}
 
-	public static String getQosForDevice(String vmUuid) {
-		return devices.get(vmUuid).getQosUuid();
+	public static String getQosForDevice(String mac) {
+		String sql = "SELECT * FROM `devicetoqos` LIMIT 0, 30 ";
+		db = new DBHelper();
+		try {
+			ResultSet result = db.executeQuery(sql);
+			if(result.next()){
+				return result.getString("qosUuid");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
-	public static void removeDevice(String vmUuid) {
-		if (devices.containsKey(vmUuid)) {
-			devices.remove(vmUuid);
+	public static void removeDevice(String mac) {
+		if (devices.containsKey(mac)) {
+			devices.remove(mac);
 
 			db = new DBHelper();
-			String sql = "DELETE FROM `device` WHERE `vmUuid`=\'" + vmUuid
-					+ "\'";
+			String sql = "DELETE FROM `device` WHERE `macAddr`=\'" + mac + "\'";
 			try {
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Remove device, 0 returned.");
@@ -180,14 +196,14 @@ public class DeviceUtil {
 		}
 	}
 
-	public static void removeQosForDevice(String vmUuid, String qosUuid) {
+	public static void removeQosForDevice(String mac, String qosUuid) {
 		// TODO Auto-generated method stub
-		if (devices.containsKey(vmUuid)) {
-			devices.get(vmUuid).setQosUuid(null);
+		if (devices.containsKey(mac)) {
+			devices.get(mac).setQosUuid(null);
 
 			DBHelper db1 = new DBHelper();
 			String sql = "DELETE FROM `devicetoqos` WHERE `qosUuid`=\'"
-					+ qosUuid + "\' AND `vmUuid`=\'" + vmUuid + "\'";
+					+ qosUuid + "\' AND `macAddr`=\'" + mac + "\'";
 			try {
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Remove qos for device, 0 returned.");
@@ -204,19 +220,19 @@ public class DeviceUtil {
 		}
 	}
 
-	public static void updateDevice(String vmUuid, String key, Object value) {
+	public static void updateDevice(String mac, String key, Object value) {
 		// TODO Auto-generated method stub
-		if (devices.containsKey(vmUuid)) {
+		if (devices.containsKey(mac)) {
 			db = new DBHelper();
 			String sql;
 			switch (key) {
 			case "uploadRate":
 				// deal with long value
-				devices.get(vmUuid).setUploadRate(((Long) value).longValue());
+				devices.get(mac).setUploadRate(((Long) value).longValue());
 
 				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = "
 						+ ((Long) value).longValue()
-						+ " WHERE `device`.`vmUuid` = \'" + vmUuid + "\';";
+						+ " WHERE `device`.`macAddr` = \'" + mac + "\';";
 				try {
 					db.executeUpdate(sql);
 				} catch (SQLException e1) {
@@ -227,14 +243,14 @@ public class DeviceUtil {
 				}
 				break;
 			case "vifNumber":
-				devices.get(vmUuid).setVifNumber(value.toString());
+				devices.get(mac).setVifNumber(value.toString());
 			case "switchPort":
-				devices.get(vmUuid).setSwitchPort(value.toString());
+				devices.get(mac).setSwitchPort(value.toString());
 			case "ipAddr":
-				devices.get(vmUuid).setIpAddr(value.toString());
+				devices.get(mac).setIpAddr(value.toString());
 				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'"
-						+ value.toString() + "\' WHERE `device`.`vmUuid` = \'"
-						+ vmUuid + "\';";
+						+ value.toString() + "\' WHERE `device`.`macAddr` = \'"
+						+ mac + "\';";
 				try {
 					db.executeUpdate(sql);
 				} catch (SQLException e) {

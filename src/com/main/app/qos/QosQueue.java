@@ -37,4 +37,13 @@ public class QosQueue {
 	public void setMaxRate(long maxRate) {
 		this.maxRate = maxRate;
 	}
+
+	/* £¨·Ç Javadoc£©
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "QosQueue [uuid=" + uuid + ", minRate=" + minRate + ", maxRate="
+				+ maxRate + "]";
+	}
 }

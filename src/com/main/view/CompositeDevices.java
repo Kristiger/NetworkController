@@ -62,15 +62,6 @@ public class CompositeDevices extends Composite {
 				while (true) {
 					try {
 						devices = DataProvider.getDevices(true);
-						if (devices != null) {
-							for (Device device : devices.values()) {
-								if (!device.isActive()) {
-									device.setActive(true);
-									DataProvider.updateDeviceStore(device,
-											UPDATETYPE.INSERT, null, null);
-								}
-							}
-						}
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -385,7 +376,8 @@ public class CompositeDevices extends Composite {
 		btnClearqos.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				XenTools.clearPortQos(currentDevice.getVifNumber());
+				DataProvider.updateDeviceStore(currentDevice, UPDATETYPE.UNBAND, null, null);
+				populateDeviceDetail(currentDevice.getMacAddr());
 			}
 		});
 		btnClearqos.setText("ClearQos");

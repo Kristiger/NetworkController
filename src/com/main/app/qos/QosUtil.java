@@ -19,7 +19,7 @@ public class QosUtil {
 	public static void addQos(QosPolicy qos) {
 		if (!qoses.containsKey(qos.getUuid())) {
 			qoses.put(qos.getUuid(), qos);
-			
+
 			db = new DBHelper();
 			String sql = "INSERT INTO `mydatabase`.`qos` (`id`, `qosUuid`, `minRate`, `maxRate`) "
 					+ "VALUES (NULL, \'"
@@ -46,21 +46,12 @@ public class QosUtil {
 			int queueId) {
 		// TODO Auto-generated method stub
 		if (qoses.containsKey(qosUuid)) {
-			qoses.get(qosUuid).getQueues().put(queueId, queueUuid);
-
+			Map<Integer, String> queues = qoses.get(qosUuid).getQueues();
 			db = new DBHelper();
-			String sql = "SELECT * FROM `qostoqueue` WHERE `qosUuid`=\'"
-					+ qosUuid + "\' AND `queueId`=" + queueId;
-			ResultSet result;
 			try {
-				// see if there is a queue to qos exist, if yes, remove it.
-				result = db.executeQuery(sql);
-				if (result.getRow() != 0) {
-					removeQueueForQos(result.getString("qosUuid"),
-							result.getString("queueUuid"),
-							result.getInt("queueId"));
-				}
-				sql = "INSERT INTO `mydatabase`.`qostoqueue` "
+				queues.put(queueId, queueUuid);
+
+				String sql = "INSERT INTO `mydatabase`.`qostoqueue` "
 						+ "(`id`, `qosUuid`, `queueUuid`, `queueId`) VALUES (NULL, \'"
 						+ qosUuid + "\', \'" + queueUuid + "\', \'" + queueId
 						+ "\');";
@@ -99,7 +90,7 @@ public class QosUtil {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally{
+		} finally {
 			db.close();
 		}
 		return qoses;

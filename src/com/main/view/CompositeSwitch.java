@@ -12,18 +12,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-
-import swing2swt.layout.FlowLayout;
 
 import com.basic.elements.Flow;
 import com.basic.elements.Port;
 import com.basic.elements.Switch;
 import com.main.provider.DataProvider;
 import com.tools.util.JSONException;
+
+import swing2swt.layout.FlowLayout;
 
 public class CompositeSwitch extends Composite {
 	private Table tablePort;

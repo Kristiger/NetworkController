@@ -32,14 +32,6 @@ public class Flow implements Comparable<Flow> {
 		this.cookie = cookie;
 	}
 
-	public String getSw() {
-		return sw;
-	}
-
-	public void setSw(String sw) {
-		this.sw = sw;
-	}
-
 	public String getTable() {
 		return table;
 	}

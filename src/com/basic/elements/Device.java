@@ -15,6 +15,8 @@ public class Device {
 	private long uploadRate = -1;
 	
 	private Date lastSeen;
+	
+	// if it is newly added from sw
 	private boolean isActive = false;
 	
 	public Device(){
