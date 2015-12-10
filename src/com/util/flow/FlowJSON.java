@@ -21,6 +21,7 @@ public class FlowJSON {
 	static JSONObject obj;
 	static JSONArray json;
 	static Future<Object> future;
+	static List<Flow> oldFlows;
 
 	// This parses JSON from the restAPI to get all the flows from a specified
 	// switch, meant for the controller overview

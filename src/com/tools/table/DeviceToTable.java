@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.basic.elements.Device;
-import com.tools.util.JSONException;
-import com.util.device.DevicesJSON;
 
 public class DeviceToTable {
 

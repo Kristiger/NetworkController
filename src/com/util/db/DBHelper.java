@@ -5,18 +5,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.eclipse.swt.internal.C;
-
-import com.basic.elements.Device;
-import com.main.app.qos.QosPolicy;
-import com.main.app.qos.QosQueue;
 
 public class DBHelper {
 	/*

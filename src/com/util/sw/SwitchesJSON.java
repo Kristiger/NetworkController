@@ -22,6 +22,7 @@ public class SwitchesJSON {
 
 	static String IP = DataProvider.getIP();
 	static Map<String, Switch> switches = new ConcurrentHashMap<String, Switch>();
+	static Map<String, Switch> old_switches = null;
 	static List<String> switchDpids = null;
 	static JSONObject obj;
 	static JSONArray json;
@@ -47,23 +48,18 @@ public class SwitchesJSON {
 				switches.put(dpid, sw);
 			}
 
-			List<Port> ports = new ArrayList<Port>();
+			Map<String, Port> ports = new ConcurrentHashMap<>();
 			Map<String, Future<Object>> stats;
 			JSONObject descriptionObj = null, aggregateObj = null, portObj = null, featuresObj = null;
 			try {
-				stats = (Map<String, Future<Object>>) futureStats.get(dpid)
-						.get(5L, TimeUnit.SECONDS);
+				stats = (Map<String, Future<Object>>) futureStats.get(dpid).get(5L, TimeUnit.SECONDS);
 				// Don't bother if we are updating this switch, since
 				// description is static
 				if (!switchExist)
-					descriptionObj = (JSONObject) stats.get("description").get(
-							5L, TimeUnit.SECONDS);
-				aggregateObj = (JSONObject) stats.get("aggregate").get(5L,
-						TimeUnit.SECONDS);
-				portObj = (JSONObject) stats.get("port").get(5L,
-						TimeUnit.SECONDS);
-				featuresObj = (JSONObject) stats.get("features").get(5L,
-						TimeUnit.SECONDS);
+					descriptionObj = (JSONObject) stats.get("description").get(5L, TimeUnit.SECONDS);
+				aggregateObj = (JSONObject) stats.get("aggregate").get(5L, TimeUnit.SECONDS);
+				portObj = (JSONObject) stats.get("port").get(5L, TimeUnit.SECONDS);
+				featuresObj = (JSONObject) stats.get("features").get(5L, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -78,15 +74,11 @@ public class SwitchesJSON {
 			// Description stats
 			if (!switchExist && descriptionObj != null) {
 				descriptionObj = descriptionObj.getJSONObject("desc");
-				sw.setManufacturerDescription(descriptionObj
-						.getString("manufacturerDescription"));
-				sw.setHardwareDescription(descriptionObj
-						.getString("hardwareDescription"));
-				sw.setSoftwareDescription(descriptionObj
-						.getString("softwareDescription"));
+				sw.setManufacturerDescription(descriptionObj.getString("manufacturerDescription"));
+				sw.setHardwareDescription(descriptionObj.getString("hardwareDescription"));
+				sw.setSoftwareDescription(descriptionObj.getString("softwareDescription"));
 				sw.setSerialNumber(descriptionObj.getString("serialNumber"));
-				sw.setDatapathDescription(descriptionObj
-						.getString("datapathDescription"));
+				sw.setDatapathDescription(descriptionObj.getString("datapathDescription"));
 			}
 
 			// Aggregate stats, ignore
@@ -98,15 +90,12 @@ public class SwitchesJSON {
 			}
 
 			// Port and Features stats
-			if (portObj == null
-					|| !portObj.has("port_reply")
-					|| !portObj.getJSONArray("port_reply").getJSONObject(0)
-							.has("port")) {
+			if (portObj == null || !portObj.has("port_reply")
+					|| !portObj.getJSONArray("port_reply").getJSONObject(0).has("port")) {
 				continue;
 			}
 
-			JSONArray json = portObj.getJSONArray("port_reply")
-					.getJSONObject(0).getJSONArray("port");
+			JSONArray json = portObj.getJSONArray("port_reply").getJSONObject(0).getJSONArray("port");
 
 			JSONArray jsontwo = new JSONArray();
 			if (featuresObj.has("portDesc")) {
@@ -118,30 +107,19 @@ public class SwitchesJSON {
 				if (!obj.has("portNumber")) {
 					continue;
 				}
-				Port port = new Port(
-						String.valueOf(obj.getString("portNumber")));
+				Port port = new Port(String.valueOf(obj.getString("portNumber")));
 
-				port.setReceivePackets(String.valueOf(obj
-						.getLong("receivePackets")));
-				port.setTransmitPackets(String.valueOf(obj
-						.getLong("transmitPackets")));
+				port.setReceivePackets(String.valueOf(obj.getLong("receivePackets")));
+				port.setTransmitPackets(String.valueOf(obj.getLong("transmitPackets")));
 				port.setReceiveBytes(String.valueOf(obj.getLong("receiveBytes")));
-				port.setTransmitBytes(String.valueOf(obj
-						.getLong("transmitBytes")));
-				port.setReceiveDropped(String.valueOf(obj
-						.getLong("receiveDropped")));
-				port.setTransmitDropped(String.valueOf(obj
-						.getLong("transmitDropped")));
-				port.setReceiveErrors(String.valueOf(obj
-						.getLong("receiveErrors")));
-				port.setTransmitErrors(String.valueOf(obj
-						.getLong("transmitErrors")));
-				port.setReceieveFrameErrors(String.valueOf(obj
-						.getInt("receiveFrameErrors")));
-				port.setReceieveOverrunErrors(String.valueOf(obj
-						.getInt("receiveOverrunErrors")));
-				port.setReceiveCRCErrors(String.valueOf(obj
-						.getInt("receiveCRCErrors")));
+				port.setTransmitBytes(String.valueOf(obj.getLong("transmitBytes")));
+				port.setReceiveDropped(String.valueOf(obj.getLong("receiveDropped")));
+				port.setTransmitDropped(String.valueOf(obj.getLong("transmitDropped")));
+				port.setReceiveErrors(String.valueOf(obj.getLong("receiveErrors")));
+				port.setTransmitErrors(String.valueOf(obj.getLong("transmitErrors")));
+				port.setReceieveFrameErrors(String.valueOf(obj.getInt("receiveFrameErrors")));
+				port.setReceieveOverrunErrors(String.valueOf(obj.getInt("receiveOverrunErrors")));
+				port.setReceiveCRCErrors(String.valueOf(obj.getInt("receiveCRCErrors")));
 				port.setCollisions(String.valueOf(obj.getInt("collisions")));
 
 				if (!jsontwo.isNull(i)) {
@@ -150,22 +128,20 @@ public class SwitchesJSON {
 						port.setName(obj.getString("name"));
 						port.setState(String.valueOf(obj.getInt("state")));
 						port.setConfig(String.valueOf(obj.getInt("config")));
-						port.setHardwareAddress(obj
-								.getString("hardwareAddress"));
-						port.setAdvertisedFeatures(String.valueOf(obj
-								.getInt("advertisedFeatures")));
-						port.setCurrentFeatures(String.valueOf(obj
-								.getInt("currentFeatures")));
-						port.setPeerFeatures(String.valueOf(obj
-								.getInt("peerFeatures")));
-						port.setSupportedFeatures(String.valueOf(obj
-								.getInt("supportedFeatures")));
+						port.setHardwareAddress(obj.getString("hardwareAddress"));
+						port.setAdvertisedFeatures(String.valueOf(obj.getInt("advertisedFeatures")));
+						port.setCurrentFeatures(String.valueOf(obj.getInt("currentFeatures")));
+						port.setPeerFeatures(String.valueOf(obj.getInt("peerFeatures")));
+						port.setSupportedFeatures(String.valueOf(obj.getInt("supportedFeatures")));
 					}
 				}
-				ports.add(port);
+
+				
+				ports.put(port.getPortNumber(), port);
 			}
 			sw.setPorts(ports);
 		}
+		old_switches = switches;
 		return switches;
 	}
 
@@ -173,7 +149,7 @@ public class SwitchesJSON {
 	public static void updateSwitch(Switch sw) throws JSONException {
 
 		String dpid = sw.getDpid();
-		List<Port> ports = new ArrayList<Port>();
+		Map<String, Port> ports = new ConcurrentHashMap<>();
 		JSONObject obj, portObj = null, featuresObj = null;
 		Map<String, Future<Object>> stats;
 		// Start the rest calls, true is passed since we are updating and don't
@@ -181,11 +157,9 @@ public class SwitchesJSON {
 		Future<Object> futureStat = SwitchJSON.startSwitchRestCalls(dpid, true);
 
 		try {
-			stats = (Map<String, Future<Object>>) futureStat.get(5L,
-					TimeUnit.SECONDS);
+			stats = (Map<String, Future<Object>>) futureStat.get(5L, TimeUnit.SECONDS);
 			portObj = (JSONObject) stats.get("port").get(5L, TimeUnit.SECONDS);
-			featuresObj = (JSONObject) stats.get("features").get(5L,
-					TimeUnit.SECONDS);
+			featuresObj = (JSONObject) stats.get("features").get(5L, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -198,14 +172,11 @@ public class SwitchesJSON {
 		}
 
 		// Port and Features stats
-		if (portObj == null
-				|| !portObj.has("port_reply")
-				|| !portObj.getJSONArray("port_reply").getJSONObject(0)
-						.has("port")) {
+		if (portObj == null || !portObj.has("port_reply")
+				|| !portObj.getJSONArray("port_reply").getJSONObject(0).has("port")) {
 			return;
 		}
-		JSONArray json = portObj.getJSONArray("port_reply").getJSONObject(0)
-				.getJSONArray("port");
+		JSONArray json = portObj.getJSONArray("port_reply").getJSONObject(0).getJSONArray("port");
 
 		JSONArray jsontwo = new JSONArray();
 		if (featuresObj.has("portDesc")) {
@@ -220,21 +191,16 @@ public class SwitchesJSON {
 			Port port = new Port(String.valueOf(obj.getString("portNumber")));
 
 			port.setReceivePackets(String.valueOf(obj.getLong("receivePackets")));
-			port.setTransmitPackets(String.valueOf(obj
-					.getLong("transmitPackets")));
+			port.setTransmitPackets(String.valueOf(obj.getLong("transmitPackets")));
 			port.setReceiveBytes(String.valueOf(obj.getLong("receiveBytes")));
 			port.setTransmitBytes(String.valueOf(obj.getLong("transmitBytes")));
 			port.setReceiveDropped(String.valueOf(obj.getLong("receiveDropped")));
-			port.setTransmitDropped(String.valueOf(obj
-					.getLong("transmitDropped")));
+			port.setTransmitDropped(String.valueOf(obj.getLong("transmitDropped")));
 			port.setReceiveErrors(String.valueOf(obj.getLong("receiveErrors")));
 			port.setTransmitErrors(String.valueOf(obj.getLong("transmitErrors")));
-			port.setReceieveFrameErrors(String.valueOf(obj
-					.getInt("receiveFrameErrors")));
-			port.setReceieveOverrunErrors(String.valueOf(obj
-					.getInt("receiveOverrunErrors")));
-			port.setReceiveCRCErrors(String.valueOf(obj
-					.getInt("receiveCRCErrors")));
+			port.setReceieveFrameErrors(String.valueOf(obj.getInt("receiveFrameErrors")));
+			port.setReceieveOverrunErrors(String.valueOf(obj.getInt("receiveOverrunErrors")));
+			port.setReceiveCRCErrors(String.valueOf(obj.getInt("receiveCRCErrors")));
 			port.setCollisions(String.valueOf(obj.getInt("collisions")));
 
 			if (!jsontwo.isNull(i)) {
@@ -244,17 +210,25 @@ public class SwitchesJSON {
 					port.setState(String.valueOf(obj.getInt("state")));
 					port.setConfig(String.valueOf(obj.getInt("config")));
 					port.setHardwareAddress(obj.getString("hardwareAddress"));
-					port.setAdvertisedFeatures(String.valueOf(obj
-							.getInt("advertisedFeatures")));
-					port.setCurrentFeatures(String.valueOf(obj
-							.getInt("currentFeatures")));
-					port.setPeerFeatures(String.valueOf(obj
-							.getInt("peerFeatures")));
-					port.setSupportedFeatures(String.valueOf(obj
-							.getInt("supportedFeatures")));
+					port.setAdvertisedFeatures(String.valueOf(obj.getInt("advertisedFeatures")));
+					port.setCurrentFeatures(String.valueOf(obj.getInt("currentFeatures")));
+					port.setPeerFeatures(String.valueOf(obj.getInt("peerFeatures")));
+					port.setSupportedFeatures(String.valueOf(obj.getInt("supportedFeatures")));
 				}
 			}
-			ports.add(port);
+			
+			if (old_switches != null) {
+				if (old_switches.get(sw.getDpid()).getPorts().containsKey(port.getPortNumber())) {
+					Port oldport = old_switches.get(sw.getDpid()).getPorts().get(port.getPortNumber());
+					Long transmitbytes = Long.valueOf(port.getTransmitBytes())
+							- Long.valueOf(oldport.getTransmitBytes());
+					Long receivedbytes = Long.valueOf(port.getReceiveBytes())
+							- Long.valueOf(oldport.getReceiveBytes());
+					port.setPortUploadRate(transmitbytes);
+					port.setPortDownloadRate(receivedbytes);
+				}
+			}
+			ports.put(port.getPortNumber(), port);
 		}
 		sw.setPorts(ports);
 	}
@@ -263,8 +237,7 @@ public class SwitchesJSON {
 		List<String> switchDpids = new ArrayList<String>();
 
 		Future<Object> futureSwDpids = Deserializer
-				.readJsonArrayFromURL("http://" + IP
-						+ ":8080/wm/core/controller/switches/json");
+				.readJsonArrayFromURL("http://" + IP + ":8080/wm/core/controller/switches/json");
 		try {
 			json = (JSONArray) futureSwDpids.get(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e2) {
@@ -277,8 +250,8 @@ public class SwitchesJSON {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
-		if(json == null) {
+
+		if (json == null) {
 			return switchDpids;
 		}
 		for (int i = 0; i < json.length(); i++) {

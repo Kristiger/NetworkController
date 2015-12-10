@@ -1,7 +1,6 @@
 package com.main.provider;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,6 @@ import com.tools.table.FlowToTable;
 import com.tools.table.PortToTable;
 import com.tools.util.JSONException;
 import com.util.controller.ControllerJSON;
-import com.util.db.DBHelper;
 import com.util.device.DeviceUtil;
 import com.util.flow.FlowJSON;
 import com.util.sw.SwitchesJSON;
@@ -81,7 +79,7 @@ public class DataProvider {
 		return PORT;
 	}
 
-	public static String[][] getPortTableFormat(List<Port> ports) {
+	public static String[][] getPortTableFormat(Map<String, Port> ports) {
 		// TODO Auto-generated method stub
 		return PortToTable.getPortTableFormat(ports);
 	}

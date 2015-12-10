@@ -3,9 +3,13 @@ package com.main.view;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -17,18 +21,14 @@ import org.eclipse.swt.widgets.TableItem;
 
 import com.basic.elements.Device;
 import com.basic.elements.UPDATETYPE;
+import com.main.app.onekey.Onekey;
 import com.main.provider.DataProvider;
+import com.main.view.util.DisplayMessage;
 import com.tools.util.JSONException;
 import com.util.xen.XenTools;
 
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.layout.RowData;
-
 public class CompositeDevices extends Composite {
 	private Table table;
-
 	private Map<String, Device> devices = null;
 	private Device currentDevice = null;
 	private Label lblIp_1;
@@ -62,7 +62,7 @@ public class CompositeDevices extends Composite {
 				while (true) {
 					try {
 						devices = DataProvider.getDevices(true);
-						Thread.sleep(5000);
+						Thread.sleep(3000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -327,8 +327,7 @@ public class CompositeDevices extends Composite {
 		lblAttachedswitch_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblAttachedswitch_1 = new FormData();
 		fd_lblAttachedswitch_1.right = new FormAttachment(70);
-		fd_lblAttachedswitch_1.bottom = new FormAttachment(lblAttachedswitch,
-				0, SWT.BOTTOM);
+		fd_lblAttachedswitch_1.bottom = new FormAttachment(lblAttachedswitch, 0, SWT.BOTTOM);
 		fd_lblAttachedswitch_1.left = new FormAttachment(lblAttachedswitch, 6);
 		lblAttachedswitch_1.setLayoutData(fd_lblAttachedswitch_1);
 		lblAttachedswitch_1.setText("AttachedSwitch1");
@@ -336,8 +335,7 @@ public class CompositeDevices extends Composite {
 		lblSwitchport_1 = new Label(grpDetail, SWT.NONE);
 		FormData fd_lblSwitchport_1 = new FormData();
 		fd_lblSwitchport_1.right = new FormAttachment(100, -20);
-		fd_lblSwitchport_1.bottom = new FormAttachment(lblAttachedswitch, 0,
-				SWT.BOTTOM);
+		fd_lblSwitchport_1.bottom = new FormAttachment(lblAttachedswitch, 0, SWT.BOTTOM);
 		fd_lblSwitchport_1.left = new FormAttachment(lblSwitchport, 6);
 		lblSwitchport_1.setLayoutData(fd_lblSwitchport_1);
 		lblSwitchport_1.setText("SwitchPort1");
@@ -362,11 +360,16 @@ public class CompositeDevices extends Composite {
 		btnAddQos.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CompositeQos cp_qos = MainFrame.getCp_qos();
-				if (currentDevice != null)
-					cp_qos.setDevice(currentDevice);
-				MainFrame.getMainStackLayout().topControl = cp_qos;
-				parent.layout();
+				/*
+				 * CompositeQos cp_qos = MainFrame.getCp_qos(); if
+				 * (currentDevice != null) cp_qos.setDevice(currentDevice);
+				 * MainFrame.getMainStackLayout().topControl = cp_qos;
+				 * parent.layout();
+				 */
+				if (currentDevice != null){
+					Onekey.setdefault(currentDevice);
+					DisplayMessage.displayStatus(MainFrame.getShell(), "Done");
+				}
 			}
 		});
 		btnAddQos.setText("Add Qos");
@@ -377,6 +380,7 @@ public class CompositeDevices extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DataProvider.updateDeviceStore(currentDevice, UPDATETYPE.UNBAND, null, null);
+				XenTools.clearPortQos(currentDevice.getVifNumber());
 				populateDeviceDetail(currentDevice.getMacAddr());
 			}
 		});
@@ -387,8 +391,7 @@ public class CompositeDevices extends Composite {
 		btnAddstaticflow.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MainFrame.getMainStackLayout().topControl = MainFrame
-						.getCp_staticflow();
+				MainFrame.getMainStackLayout().topControl = MainFrame.getCp_staticflow();
 				parent.layout();
 			}
 		});

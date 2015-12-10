@@ -9,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,6 +31,7 @@ public class Deserializer {
 
 	public static Future<Object> readJsonArrayFromURL(final String surl) {
 		final Future<Object> future = executor.submit(new Callable<Object>() {
+			@Override
 			public Object call() {
 				try {
 					URL url = new URL(surl);
@@ -67,6 +67,7 @@ public class Deserializer {
 
 	public static Future<Object> readJsonObjectFromURL(final String surl) {
 		final Future<Object> future = executor.submit(new Callable<Object>() {
+			@Override
 			public Object call() {
 				try {
 					URL url = new URL(surl);
@@ -101,6 +102,7 @@ public class Deserializer {
 
 	public static Future<Object> readJsonObjectFromURLByPUT(final String surl) {
 		final Future<Object> future = executor.submit(new Callable<Object>() {
+			@Override
 			public Object call() {
 				try {
 					URL url = new URL(surl);

@@ -1,8 +1,7 @@
 package com.basic.elements;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Switch {
 
@@ -10,7 +9,7 @@ public class Switch {
 			serialNumber, datapathDescription, dpid, packetCount, byteCount,
 			flowCount;
 
-	List<Port> ports = new ArrayList<Port>();
+	Map<String, Port> ports = new ConcurrentHashMap<>();
 
 	public Switch(String dpid) {
 		this.dpid = dpid;
@@ -88,12 +87,11 @@ public class Switch {
 		this.datapathDescription = datapathDescription;
 	}
 
-	public List<Port> getPorts() {
-		Collections.sort(ports);
+	public Map<String, Port> getPorts() {
 		return ports;
 	}
 
-	public void setPorts(List<Port> ports) {
+	public void setPorts(Map<String, Port> ports) {
 		this.ports = ports;
 	}
 }

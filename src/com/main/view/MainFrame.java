@@ -33,8 +33,8 @@ public class MainFrame {
 	private CompositeController cp_controller = null;
 	private CompositeSwitch cp_switches = null;
 	private CompositeDevices cp_devicees = null;
-	private static CompositeQos cp_qos = null;
 	private CompositeFirewall cp_firewall = null;
+	private static CompositeQos cp_qos = null;
 	private static CompositeStaticFlow cp_staticflow = null;
 
 	private TreeItem trtmSwitches;

@@ -5,7 +5,6 @@ import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
 import com.main.provider.DataProvider;
 import com.main.view.MainFrame;
-import com.main.view.StartUp;
 import com.util.xen.XenTools;
 
 public class NetworkController {
@@ -19,83 +18,66 @@ public class NetworkController {
 	}
 
 	public static void addDefaultQosAndQueue() {
-		String qosUuid = XenTools.createRow("qos", 50000, 50000);
+		String qosUuid = XenTools.createRow("qos", 50000000, 50000000);// 50M
 		if (qosUuid != null) {
-			QosPolicy qos = new QosPolicy(qosUuid, 50000, 50000);
+			QosPolicy qos = new QosPolicy(qosUuid, 5000000, 5000000);
 			DataProvider.updateQosStore(qos, null, -1, UPDATETYPE.INSERT);
 
-			String queueUuid = XenTools.createRow("queue", 50000, 50000);
+			String queueUuid = XenTools.createRow("queue", 50000000, 50000000);//50M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 50000, 50000);
+				QosQueue queue = new QosQueue(queueUuid, 50000000, 50000000);
 				XenTools.addQosQueue(qosUuid, 0, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 0, UPDATETYPE.BAND);
 			}
 			
-			queueUuid = XenTools.createRow("queue", 20000, 20000);
+			queueUuid = XenTools.createRow("queue", 20000000, 20000000);//20M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 20000, 20000);
+				QosQueue queue = new QosQueue(queueUuid, 20000000, 20000000);
 				XenTools.addQosQueue(qosUuid, 1, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 1, UPDATETYPE.BAND);
 			}
 			
-			queueUuid = XenTools.createRow("queue", 10000, 10000);
+			queueUuid = XenTools.createRow("queue", 10000000, 10000000);//10M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 10000, 10000);
+				QosQueue queue = new QosQueue(queueUuid, 10000000, 10000000);
 				XenTools.addQosQueue(qosUuid, 2, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 2, UPDATETYPE.BAND);
 			}
 			
-			queueUuid = XenTools.createRow("queue", 5000, 5000);
+			queueUuid = XenTools.createRow("queue", 5000000, 5000000);//5M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 5000, 5000);
+				QosQueue queue = new QosQueue(queueUuid, 5000000, 5000000);
 				XenTools.addQosQueue(qosUuid, 3, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 3, UPDATETYPE.BAND);
 			}
 			
-			queueUuid = XenTools.createRow("queue", 2000, 2000);
+			queueUuid = XenTools.createRow("queue", 2000000, 2000000);//2M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 2000, 2000);
+				QosQueue queue = new QosQueue(queueUuid, 2000000, 2000000);
 				XenTools.addQosQueue(qosUuid, 4, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 4, UPDATETYPE.BAND);
 			}
 			
-			queueUuid = XenTools.createRow("queue", 1000, 1000);
+			queueUuid = XenTools.createRow("queue", 1000000, 1000000);//1M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 1000, 1000);
+				QosQueue queue = new QosQueue(queueUuid, 1000000, 1000000);
 				XenTools.addQosQueue(qosUuid, 5, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 5, UPDATETYPE.BAND);
 			}
 
-			queueUuid = XenTools.createRow("queue", 500, 500);
+			queueUuid = XenTools.createRow("queue", 500000, 500000);//0.5M
 			if (queueUuid != null) {
-				QosQueue queue = new QosQueue(queueUuid, 500, 500);
+				QosQueue queue = new QosQueue(queueUuid, 500000, 500000);
 				XenTools.addQosQueue(qosUuid, 6, queueUuid);
 				DataProvider.updateQueueStore(queue, UPDATETYPE.INSERT);
 				DataProvider.updateQosStore(qos, queueUuid, 6, UPDATETYPE.BAND);
 			}
 		}
-	}
-	
-	
-	/*
-	 * 1. 3389
-	 * 2. TCP
-	 * 3. UDP
-	 * 4. BT
-	 * 5. OTHER
-	 * */
-	public static void defaultFlow(){
-		
-		String flow1 = "";
-		String flow2 = "";
-		String flow3 = "";
-		String flow4 = "";
-		String flow5 = "";
 	}
 }

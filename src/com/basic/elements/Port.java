@@ -2,9 +2,12 @@ package com.basic.elements;
 
 public class Port implements Comparable<Port>{
 
-	String portNumber, receivePackets, transmitPackets, receiveBytes, transmitBytes, receiveDropped, transmitDropped, receiveErrors,
+	private String portNumber, receivePackets, transmitPackets, receiveBytes, transmitBytes, receiveDropped, transmitDropped, receiveErrors,
 	transmitErrors, receieveFrameErrors, receieveOverrunErrors, receiveCRCErrors, collisions, advertisedFeatures, config, currentFeatures, 
 	hardwareAddress, name, peerFeatures, state, supportedFeatures, errors;
+	
+	private Long portUploadRate = 0l;
+	private Long portDownloadRate = 0l;
 	
 	public String getAdvertisedFeatures() {
 		return advertisedFeatures;
@@ -221,6 +224,22 @@ public class Port implements Comparable<Port>{
 
 	public void setCollisions(String collisions) {
 		this.collisions = collisions;
+	}
+
+	public Long getPortUploadRate() {
+		return portUploadRate;
+	}
+
+	public void setPortUploadRate(Long portUploadRate) {
+		this.portUploadRate = portUploadRate;
+	}
+
+	public Long getPortDownloadRate() {
+		return portDownloadRate;
+	}
+
+	public void setPortDownloadRate(Long portDownloadRate) {
+		this.portDownloadRate = portDownloadRate;
 	}
 
 	@Override

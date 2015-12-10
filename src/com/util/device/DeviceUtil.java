@@ -2,6 +2,7 @@ package com.util.device;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.basic.elements.Device;
 import com.basic.elements.Port;
 import com.basic.elements.Switch;
-import com.main.app.qos.QosPolicy;
 import com.main.provider.DataProvider;
 import com.tools.util.JSONException;
 import com.util.db.DBHelper;
@@ -26,17 +26,14 @@ public class DeviceUtil {
 			db = new DBHelper();
 			String sql = "INSERT INTO `mydatabase`.`device` "
 					+ "(`id`, `vmUuid`, `vifUuid`, `vifNumber`, `switchPort`, `ipAddr`, `macAddr`)"
-					+ " VALUES (NULL, \'" + device.getVmUuid() + "\'," + " \'"
-					+ device.getVifUuid() + "\', " + "\'"
-					+ device.getVifNumber() + "\', " + "\'"
-					+ device.getSwitchPort() + "\', " + "\'"
-					+ device.getIpAddr() + "\', " + "\'" + device.getMacAddr()
-					+ "\');";
+					+ " VALUES (NULL, \'" + device.getVmUuid() + "\'," + " \'" + device.getVifUuid() + "\', " + "\'"
+					+ device.getVifNumber() + "\', " + "\'" + device.getSwitchPort() + "\', " + "\'"
+					+ device.getIpAddr() + "\', " + "\'" + device.getMacAddr() + "\');";
 			try {
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Insert device, 0 returned.");
 				}
-				
+
 				// means it has update to db
 				device.setActive(true);
 			} catch (SQLException e) {
@@ -55,20 +52,18 @@ public class DeviceUtil {
 			devices.get(mac).setQosUuid(qosUuid);
 
 			db = new DBHelper();
-			String sql = "SELECT * FROM `devicetoqos` WHERE `macAddr`=\'" + mac
-					+ "\'";
+			String sql = "SELECT * FROM `devicetoqos` WHERE `macAddr`=\'" + mac + "\'";
 			ResultSet result;
 			try {
 				// see if there is a qos to device exist, if yes, remove it.
 				result = db.executeQuery(sql);
 				if (result.getRow() != 0) {
-					removeQosForDevice(result.getString("macAddr"),
-							result.getString("qosUuid"));
+					removeQosForDevice(result.getString("macAddr"), result.getString("qosUuid"));
 				}
 
 				// insert qos
-				sql = "INSERT INTO `mydatabase`.`devicetoqos` (`id`, `macAddr`, `qosUuid`) VALUES (NULL, \'"
-						+ mac + "\', \'" + qosUuid + "\');";
+				sql = "INSERT INTO `mydatabase`.`devicetoqos` (`id`, `macAddr`, `qosUuid`) VALUES (NULL, \'" + mac
+						+ "\', \'" + qosUuid + "\');";
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Insert qos for device, 0 returned.");
 				}
@@ -90,23 +85,16 @@ public class DeviceUtil {
 
 	private static void getDeviceFromController() throws JSONException {
 		DevicesJSON.getDeviceSummaries(devices);
-		for (Device device : devices.values()) {
-			if (device.getSwitchDpid() != null) {
-				Switch sw = DataProvider.getSwitch(device.getSwitchDpid());
+
+		for(Device dev : devices.values()){
+			if (dev.getSwitchDpid() != null) {
+				Switch sw = DataProvider.getSwitch(dev.getSwitchDpid());
 				if (sw != null) {
-					List<Port> ports = sw.getPorts();
-					if (ports != null) {
-						Iterator<Port> it = ports.iterator();
-						while (it.hasNext()) {
-							Port port = it.next();
-							if (port.getPortNumber().equals(
-									device.getSwitchPort())) {
-								device.setVifNumber(port.getName());
-								if(device.isActive() == false){
-									addDevice(device);
-								}
-								break;
-							}
+					Map<String, Port> ports = sw.getPorts();
+					if (ports.containsKey(dev.getSwitchPort())) {
+						dev.setVifNumber(ports.get(dev.getSwitchPort()).getName());
+						if (dev.isActive() == false) {
+							addDevice(dev);
 						}
 					}
 				}
@@ -164,7 +152,7 @@ public class DeviceUtil {
 		db = new DBHelper();
 		try {
 			ResultSet result = db.executeQuery(sql);
-			if(result.next()){
+			if (result.next()) {
 				return result.getString("qosUuid");
 			}
 		} catch (SQLException e) {
@@ -202,8 +190,7 @@ public class DeviceUtil {
 			devices.get(mac).setQosUuid(null);
 
 			DBHelper db1 = new DBHelper();
-			String sql = "DELETE FROM `devicetoqos` WHERE `qosUuid`=\'"
-					+ qosUuid + "\' AND `macAddr`=\'" + mac + "\'";
+			String sql = "DELETE FROM `devicetoqos` WHERE `qosUuid`=\'" + qosUuid + "\' AND `macAddr`=\'" + mac + "\'";
 			try {
 				if (db.executeUpdate(sql) == 0) {
 					throw new Exception("Remove qos for device, 0 returned.");
@@ -230,8 +217,7 @@ public class DeviceUtil {
 				// deal with long value
 				devices.get(mac).setUploadRate(((Long) value).longValue());
 
-				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = "
-						+ ((Long) value).longValue()
+				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = " + ((Long) value).longValue()
 						+ " WHERE `device`.`macAddr` = \'" + mac + "\';";
 				try {
 					db.executeUpdate(sql);
@@ -248,9 +234,8 @@ public class DeviceUtil {
 				devices.get(mac).setSwitchPort(value.toString());
 			case "ipAddr":
 				devices.get(mac).setIpAddr(value.toString());
-				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'"
-						+ value.toString() + "\' WHERE `device`.`macAddr` = \'"
-						+ mac + "\';";
+				sql = "UPDATE `mydatabase`.`device` SET `" + key + "` = \'" + value.toString()
+						+ "\' WHERE `device`.`macAddr` = \'" + mac + "\';";
 				try {
 					db.executeUpdate(sql);
 				} catch (SQLException e) {

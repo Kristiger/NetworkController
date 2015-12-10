@@ -2,6 +2,7 @@ package com.main.view;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -36,7 +37,7 @@ public class CompositeSwitch extends Composite {
 	private TableColumn tblclmnPriority, tblclmnTimeout, tblclmnVif;
 	private Switch currentSwitch;
 	private List<Flow> flows = null;
-	private List<Port> ports = null;
+	private Map<String, Port> ports = null;
 	private Label lblSerialnumber;
 	private TableColumn tblclmnReceivebyte;
 	private TableColumn tblclmnErrors;
@@ -89,6 +90,7 @@ public class CompositeSwitch extends Composite {
 					while (true) {
 						if (currentSwitch != null) {
 							Display.getDefault().asyncExec(new Runnable() {
+								@Override
 								public void run() {
 									// update current switch
 									try {
@@ -105,7 +107,7 @@ public class CompositeSwitch extends Composite {
 								}
 							});
 						}
-						Thread.sleep(5000);
+						Thread.sleep(1000);
 					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -262,7 +264,7 @@ public class CompositeSwitch extends Composite {
 
 		tblclmnErrors = new TableColumn(tablePort, SWT.NONE);
 		tblclmnErrors.setWidth(100);
-		tblclmnErrors.setText("Errors");
+		tblclmnErrors.setText("Up/Down Rate");
 
 		composite_1 = new Composite(this, SWT.NONE);
 		FormData fd_composite_1 = new FormData();

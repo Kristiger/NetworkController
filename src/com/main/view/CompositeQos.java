@@ -1,9 +1,9 @@
 package com.main.view;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -18,10 +18,14 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.basic.elements.Action;
 import com.basic.elements.Device;
+import com.basic.elements.Flow;
+import com.basic.elements.Match;
 import com.basic.elements.UPDATETYPE;
 import com.main.app.qos.QosPolicy;
 import com.main.app.qos.QosQueue;
+import com.main.app.staticflow.pusher.FlowManagerPusher;
 import com.main.provider.DataProvider;
 import com.main.view.util.DisplayMessage;
 import com.tools.util.JSONException;
@@ -36,19 +40,27 @@ public class CompositeQos extends Composite {
 	private Text textDelMax;
 	private Text textDelMin;
 	private Text textVlan;
-	private Combo comboDevice;
+
 	private Label lblIp;
 	private Label lblMac;
+	private Label lblqosInfo;
+
 	private Device device = null;
-	private Map<String, Device> devices = null;
+
+	private Combo comboDevice;
 	private Combo comboDelete;
+	private Combo comboQos;
+
 	private QosQueue queue;
 	private QosPolicy qos;
+
+	private Map<String, Device> devices = null;
+	private Map<String, QosPolicy> qoses = null;
+	private Map<String, QosQueue> queues = null;
+
 	private final int MAXQUEUE = 7;
-	private Map<String, QosPolicy> qoses;
-	private Map<String, QosQueue> queues;
-	private Combo comboQos;
-	private Label lblqosInfo;
+	private final int RDPQUEUEID = 1;
+	private final int RDPPRIORITY = 20;
 
 	/**
 	 * Create the composite.
@@ -90,7 +102,7 @@ public class CompositeQos extends Composite {
 			if (device != null) {
 				lblIp.setText(device.getIpAddr());
 				lblMac.setText(device.getMacAddr());
-				
+
 				populateQueuesCombo();
 				populateQosCombo();
 			}
@@ -578,11 +590,43 @@ public class CompositeQos extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				device.setQosUuid(qos.getUuid());
 				DataProvider.updateDeviceStore(device, UPDATETYPE.BAND, null, null);
+				XenTools.setPortQos(device.getVifNumber(), qos.getUuid());
 				DisplayMessage.displayStatus(MainFrame.getShell(), "Band done.");
+				addDefaultFlows();
 			}
 		});
 		btnChoose.setBounds(390, 23, 75, 25);
 		btnChoose.setText("Choose");
+	}
+
+	protected void addDefaultFlows() {
+		// TODO Auto-generated method stub
+		Flow flowrdp = new Flow();
+		flowrdp.setName("flowrdp");
+		flowrdp.setPriority(String.valueOf(RDPPRIORITY));
+		flowrdp.setSwitch(device.getSwitchDpid());
+
+		Match matchrdp = new Match();
+		matchrdp.setDataLayerDestination(device.getIpAddr());
+		matchrdp.setDataLayerType("0x0800");
+		matchrdp.setTransportDestination("3389");
+		matchrdp.setNetworkProtocol("0x6");
+
+		List<Action> actions = new ArrayList<>();
+		Action actionrdp = new Action("enqueue", device.getSwitchPort() + ":" + RDPQUEUEID);
+		actions.add(actionrdp);
+		flowrdp.setMatch(matchrdp);
+		flowrdp.setActions(actions);
+
+		try {
+			System.out.println(FlowManagerPusher.push(flowrdp));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

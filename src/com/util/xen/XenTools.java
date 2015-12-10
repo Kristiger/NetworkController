@@ -80,10 +80,10 @@ public class XenTools {
 		}
 	}
 
-	public static void setUploadRate(String portId, long maxRate, long burstRate) {
+	public static void setUploadRate(String vifPort, long maxRate, long burstRate) {
 		String command1 = "";
 		if (maxRate > 0) {
-			command1 = "ovs-vsctl set interface " + portId
+			command1 = "ovs-vsctl set interface " + vifPort
 					+ " ingress_policing_rate=" + maxRate;
 		} else {
 			log.info("Max rate must be set.");
@@ -98,7 +98,7 @@ public class XenTools {
 
 		String command2 = "";
 		if (burstRate > 0) {
-			command2 = "ovs-vsctl set interface " + portId
+			command2 = "ovs-vsctl set interface " + vifPort
 					+ " ingress_policing_burst=" + burstRate;
 		}
 
@@ -109,24 +109,24 @@ public class XenTools {
 
 	}
 
-	public static void setPortQos(String portId, String qosUuid) {
-		String command = "ovs-vsctl set port " + portId + " qos=" + qosUuid;
+	public static void setPortQos(String vifPort, String qosUuid) {
+		String command = "ovs-vsctl set port " + vifPort + " qos=" + qosUuid;
 		List<String> result = new SSHConnector().exec(command);
 		if (result.size() != 0) {
 			log.info("Error occured :" + result.get(0));
 		}
 	}
 
-	public static void clearPortQos(String portId) {
-		String command = "ovs-vsctl clear port " + portId + " qos";
+	public static void clearPortQos(String vifPort) {
+		String command = "ovs-vsctl clear port " + vifPort + " qos";
 		List<String> result = new SSHConnector().exec(command);
 		if (result.size() != 0) {
 			log.info("Error occured :" + result.get(0));
 		}
 	}
 
-	public static void setVlanTag(String portId, int vlanTag) {
-		String command = "ovs-vsctl set interface " + portId + " tag="
+	public static void setVlanTag(String vifPort, int vlanTag) {
+		String command = "ovs-vsctl set interface " + vifPort + " tag="
 				+ vlanTag;
 		List<String> result = new SSHConnector().exec(command);
 		if (result.size() != 0) {
@@ -134,10 +134,10 @@ public class XenTools {
 		}
 	}
 
-	public static List<String> getUuids(String portId) {
+	public static List<String> getUuids(String vifPort) {
 		// String command =
 		// "xe vm-vif-list | grep -v network | grep -E \'uuid|label\'";
-		String command = "ovs-vsctl list interface " + portId
+		String command = "ovs-vsctl list interface " + vifPort
 				+ " | grep external_ids";
 		List<String> result = new SSHConnector().exec(command);
 		if (result.size() == 0) {

@@ -89,7 +89,7 @@ public class HexString {
     
     public static class U8 {
         public static short f(byte i) {
-            return (short) ((short)i & 0xff);
+            return (short) (i & 0xff);
         }
 
         public byte t(short l) {
